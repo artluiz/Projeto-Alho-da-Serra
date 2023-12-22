@@ -4,7 +4,7 @@ from django.db import models
 # Create your models here.
 class Estufa(models.Model):
     nome_estufa = models.CharField(max_length=50, null=False, blank=False)
-    area = models.DecimalField(max_digits=8, decimal_places=4)
+    area = models.DecimalField(decimal_places=4, max_digits=8)
     Fazenda = models.CharField(max_length=50, null=False, blank=False)
 
 
@@ -17,14 +17,20 @@ class Produtos(models.Model):
     codigo = models.IntegerField(null=False)
     descricao = models.CharField(max_length=100, null=False, blank=False)
 
+
 class TipoIrrigador(models.Model):
     nome_tipo = models.CharField(max_length=50, null=False, blank=False)
-    
+
+
 class FichaDeAplicacao(models.Model):
-    data_criada= models.DateTimeField(blank = False, auto_now=False, auto_now_add=True)
-    data_planejada= models.DateTimeField(blank = False, auto_now=False, auto_now_add=False)
-    data_aplicada= models.DateTimeField(blank = False, auto_now=False, auto_now_add=False)
-    atividade_id= models.PositiveIntegerField(null=False)
-    estufa_id= models.PositiveIntegerField(null=False)
-    produto_id= models.PositiveIntegerField(null=False)
-    irrigador_id= models.PositiveIntegerField(null=False)
+    data_criada = models.DateTimeField(blank=False, auto_now=False, auto_now_add=True)
+    data_planejada = models.DateTimeField(
+        blank=False, auto_now=False, auto_now_add=False
+    )
+    data_aplicada = models.DateTimeField(
+        blank=False, auto_now=False, auto_now_add=False
+    )
+    atividade_id = models.PositiveIntegerField(null=False)
+    estufa_id = models.PositiveIntegerField(null=False)
+    produto_id = models.PositiveIntegerField(null=False)
+    irrigador_id = models.PositiveIntegerField(null=False)
