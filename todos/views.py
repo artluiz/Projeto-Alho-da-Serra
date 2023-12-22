@@ -1,4 +1,4 @@
-from django.views.generic import ListView, CreateView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 
 from .models import Estufa
@@ -14,6 +14,11 @@ class EstufaCreateView(CreateView):
     success_url = reverse_lazy("estufa_list")
 
 
-#              href="{% url 'estufa_delete' pk=estufa.pk %}"
+class EstufaUpdateView(UpdateView):
+    model = Estufa
+    fields = ["nome_estufa", "area", "Fazenda"]
+    success_url = reverse_lazy("estufa_list")
 
-# href="{% url 'estufa_update' pk=estufa.pk %}"
+
+class EstufaDeleteView(DeleteView):
+    model = Estufa
