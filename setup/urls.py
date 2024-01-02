@@ -19,7 +19,7 @@ from todos.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", todo_home),
+    path("", todo_home, name="home_page"),
     path("estufa", EstufaListView.as_view(), name="estufa_list"),
     path("estufa/create/", EstufaCreateView.as_view(), name="estufa_create"),
     path("estufa/update/<int:pk>", EstufaUpdateView.as_view(), name="estufa_update"),
