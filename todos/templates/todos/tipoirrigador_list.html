@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block page_title %} Tipos de Irrigadores aa ss aaa
+{% endblock page_title %} {% block content %}
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Tipo de irrigador</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for irrigador in tipoirrigador_list %}
+    <tr>
+      <th scope="row">{{ irrigador.pk }}</th>
+      <td>{{ irrigador.nome_tipo }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock content %}

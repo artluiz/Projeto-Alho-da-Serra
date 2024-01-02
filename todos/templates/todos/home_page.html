@@ -1,0 +1,156 @@
+{% extends "base.html" %} {% load static %}
+{% block content %} {% load tz %}
+    <style>
+      /* Exemplo de estilo básico, personalize conforme necessário */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .cabecalho {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo-container {
+          display: flex;
+          align-items: center;
+      }
+
+      .logo {
+          max-width: 100px;  /* Ajuste conforme necessário */
+          margin-right: 10px;  /* Espaço entre o logo e o texto "Controle de aplicações" */
+      }
+      
+      .info-container {
+          margin-top: 20px;
+          display: flex;
+          flex-direction: column;  /* Empilhe os elementos verticalmente */
+          align-items: center;
+      }
+
+      .numero-recomendacao,
+      .data-operacao {
+          margin-bottom: 5px;  /* Adicione um espaçamento entre os parágrafos */
+      }
+      p {
+          margin: 0;  /* Remova a margem padrão dos parágrafos para evitar espaços indesejados */
+      }
+
+      .campo-selecao {
+        margin-top: 5px;
+      }
+      table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="cabecalho">
+        <!-- Logo da empresa -->
+        <div class="logo-container">
+          <img src="{% static '/todos/images/Yui2.jpg' %}" alt="Logo da Empresa" class="logo">
+            <h1>Controle de aplicações</h1>
+        </div>
+
+        <!-- Número da relação e data da operação -->
+        <div class="info-container">
+          <div class="numero-recomendacao">
+              <p>Número da Recomendação: 123</p>
+          </div>
+          <div class="data-operacao">
+              <p>Data da Operação: {% now "d/m/Y" %}</p>
+          </div>
+      ' </div>
+    </div>
+    <div>
+      <p>Atividade: <select class="campo-selecao">
+          {% for atividade in atividades %}
+            <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+          {% endfor %}
+        </select>
+      </p>
+    </div>
+    <div>
+      <p> Estufa: <select class="campo-selecao">
+          {% for estufa in estufas %}
+            <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+          {% endfor %}
+        </select>
+        <p>Área: {{ area }}</p>
+      </p>
+    </div>
+    <div>
+      <p> Irrigador: <select class="campo-selecao">
+          {% for tipo_irrigador in tipos_irrigador %}
+            <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+          {% endfor %}
+        </select>
+      </p>
+    </div>
+
+    <table>
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Produto</th>
+            <th>Dose por HÁ</th>
+            <th>Setor A</th>
+            <th>Setor B</th>
+            <th>Anti Câmara</th>
+            <th>Consumo Previsto</th>
+            <th>Consumo Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Produto A</td>
+            <td>2</td>
+            <td>-</td>
+            <td>-</td>
+            <td>#VALOR!</td>
+            <td>#VALOR!</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Produto B</td>
+            <td>3</td>
+            <td>-</td>
+            <td>-</td>
+            <td>#VALOR!</td>
+            <td>#VALOR!</td>
+            <td></td>
+        </tr>
+        <!-- Adicione as outras linhas conforme necessário -->
+        <tr>
+            <td>10</td>
+            <td></td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+    </tbody>
+</table>
+
+    <!-- Conteúdo da página continua aqui -->
+  </body>
+{% endblock content %}

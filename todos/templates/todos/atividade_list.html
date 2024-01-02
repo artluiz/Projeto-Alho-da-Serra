@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block page_title %} Atividades {% endblock page_title %}
+
+{% block content %}
+    {% if atividade_list %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Nome da Atividade</th>
+          <th scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for atividade in atividade_list %}
+        <tr>
+          <th scope="row">{{ atividade.pk }}</th>
+          <td>{{ atividade.nome }}</td>
+          <td>
+            <a href="{% url 'atividade_update' pk=atividade.pk %}"
+               class="btn btn-secondary btn-sm {% if atividade.data_aplicada %}disabled{% endif %}"
+            >
+              Editar
+            </a>
+            <a href="{% url 'atividade_delete' pk=atividade.pk %}" class="btn btn-danger btn-sm">Excluír</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>Não há Atividades cadastradas</p>
+    {% endif %}
+    <a href="{% url "atividade_create"%}" class="btn btn-primary btn-sm"> Cadastrar Atividade</a>
+    {% endblock content %}
+    

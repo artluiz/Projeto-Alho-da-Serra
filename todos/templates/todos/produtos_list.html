@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block page_title %} Produtos {% endblock page_title %}
+
+{% block content %}
+    {% if produtos_list %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Nome da Produto</th>
+          <th scope="col">Codigo</th>
+          <th scope="col">Descrição</th>
+          <th scope="col">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for produto in produtos_list %}
+        <tr>
+          <th scope="row">{{ produto.pk }}</th>
+          <td>{{ produto.nome_produto }}</td>
+          <td>{{ produto.codigo }}</td>
+          <td>{{ produto.descricao }}</td>
+          <td>
+            <a href="{% url 'produtos_update' pk=produto.pk %}"
+               class="btn btn-secondary btn-sm {% if produto.data_aplicada %}disabled{% endif %}"
+            >
+              Editar
+            </a>
+            <a href="{% url 'produtos_delete' pk=produto.pk %}" class="btn btn-danger btn-sm">Excluír</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>Não há Produtos cadastradas</p>
+    {% endif %}
+    <a href="{% url "produtos_create"%}" class="btn btn-primary btn-sm"> Cadastrar produto</a>
+    {% endblock content %}
+    

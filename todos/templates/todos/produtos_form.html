@@ -1,8 +1,8 @@
 {% extends "base.html" %} {% load crispy_forms_tags %} {% block page_title %}
-Estufas {% endblock page_title %} {% block content %} {% if estufa.pk %}
-<h1>Alterar Estufa</h1>
+Produtos {% endblock page_title %} {% block content %} {% if produto.pk %}
+<h1>Alterar Produto</h1>
 {% else %}
-<h1>Nova Estufa</h1>
+<h1>Nova Produto</h1>
 {% endif %}
 
 <form method="POST" class="uniForm">
@@ -10,6 +10,5 @@ Estufas {% endblock page_title %} {% block content %} {% if estufa.pk %}
   <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
 </form>
 
-<a href="{% url "estufa_list"%}" class="btn btn-secondary btn-sm"> Voltar</a>
-
+<a href="{% url "produtos_list"%}" class="btn btn-secondary btn-sm"> Voltar </a>
 {% endblock content %}
