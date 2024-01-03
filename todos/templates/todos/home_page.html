@@ -78,6 +78,7 @@
       ' </div>
     </div>
     <form method="POST" class="uniForm">
+      {% csrf_token %}
       <div>
         <p>Atividade: <select class="campo-selecao">
             {% for atividade in atividades %}
@@ -100,7 +101,7 @@
         </p>
       </div>
       <div>
-        <p> Irrigador: <select class="campo-selecao">
+        <p> Irrigador: <select class="campo-selecao", id="id_tipo_irrigador">
             {% for tipo_irrigador in tipos_irrigador %}
               <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
             {% endfor %}
@@ -121,79 +122,91 @@
             </tr>
         </thead>
         <tbody>
-            <tr>
-                <td>1</td>
-                <td><select class="campo-selecao">
+            {% for i in range %}
+              <tr>
+                <td>{{ i }}</td>
+                <td>
+                  <select class="campo-selecao">
                     {% for produto in produtos %}
                       <option value={{ produto.pk }}>{{ produto.nome_produto }}</option>
                     {% endfor %}
-                  </select></td>
-                <td><input type="numeric" id="dose1"></td>
-                <td><input type="numeric" id="campo1" name="campo1" readonly></td>
-                <td><input type="numeric" id="campo2" name="campo2" readonly></td>
-                <td><input type="numeric" id="anti_camara" name="anti_camara" readonly></td>
-                <td><input type="numeric" id="previsto" name="previsto" readonly></td>
-                <td><input type="numeric" id="total"></td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td><select class="campo-selecao">
-                    {% for produto in produtos %}
-                      <option value={{ produto.pk }}>{{ produto.nome_produto }}</option>
-                    {% endfor %}
-                  </select></td>
-                <td><input type="numeric" id="dose1"></td>
-                <td><input type="numeric" id="campo1" name="campo1" readonly></td>
-                <td><input type="numeric" id="campo2" name="campo2" readonly></td>
-                <td><input type="numeric" id="anti_camara" name="anti_camara" readonly></td>
-                <td><input type="numeric" id="previsto" name="previsto" readonly></td>
-                <td><input type="numeric" id="total"></td>
-            </tr>
-            <!-- Adicione as outras linhas conforme necessário -->
-            <tr>
-                <td>10</td>
-                <td></td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-                <td>-</td>
-            </tr>
+                  </select>
+                </td>
+                <td><input type="number" id="dose_{{ i }}"></td>
+                <td><input type="number" id="campo1_{{ i }}" name="campo1_{{ i }}" readonly></td>
+                <td><input type="number" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
+                <td><input type="number" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
+                <td><input type="number" id="previsto_{{ i }}" name="previsto_{{ i }}" readonly></td>
+                <td><input type="number" id="total_{{ i }}"></td>
+              </tr>
+            {% endfor %}
         </tbody>
       </table>
       <button href="{% url "estufa_list"%}" type="submit" class="btn btn-primary btn-sm">Salvar</button>
     </form>
+
     <!-- Conteúdo da página continua aqui -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      var campo1 = document.getElementById('campo1');
-      var campo2 = document.getElementById('campo2');
-      var areaInput = document.getElementById('id_area');
-      var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
+  <script defer>
+  document.addEventListener('DOMContentLoaded', function () {
+    var areaInput = document.getElementById('id_area');
+    var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
 
-      // Adiciona um ouvinte de evento para o campo de área
-      areaInput.addEventListener('input', function () {
-        atualizarCampos();
-      });
-
-      // Função para atualizar os campos
-      function atualizarCampos() {
-        // Obtenha o valor da área
-        var area = areaInput.value;
-        
-
-        // Faça o processamento necessário para obter os valores para campo1 e campo2
-        // Substitua isso com sua lógica específica
-        var valorCampo1 = area;
-        var valorCampo2 = area;
-        
-        // Atualize os campos de entrada com os valores calculados
-        campo1.value = area;
-        campo2.value = valorCampo2;
-      }
+    // Adiciona um ouvinte de evento para o campo de área
+    areaInput.addEventListener('input', function () {
+      atualizarCampos();
     });
-  </script>
+
+    // Adiciona um ouvinte de evento para o campo tipo_irrigador
+    tipoIrrigadorInput.addEventListener('change', function () {
+      atualizarCampos();
+    });
+
+    function atualizarCampos() {
+      // Obtenha o valor da área
+      var area = parseFloat(areaInput.value) || 0;
+      var tipoIrrigador = tipoIrrigadorInput.value;
+
+      // Faça o processamento necessário para obter os valores para campo1 e campo2
+      // Substitua isso com sua lógica específica
+      var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
+
+      if (tipoIrrigador === '1') {
+        camposDinamicos.forEach(function (campo) {
+          // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
+          var indice = campo.id.split('_')[1];
+          if(document.getElementById('dose_' + indice).value){
+
+          var valorCampo1 = area * indice; //exemplo de cálculo
+          var valorCampo2 = area * 2 * indice;
+
+          // Atualize os campos de entrada com os valores calculados
+          campo.value = valorCampo1;
+          document.getElementById('campo2_' + indice).value = valorCampo2;
+          document.getElementById('anti_camara_' + indice).value = "-";
+
+          }
+        });
+      } else {
+        console.log(tipoIrrigador)
+        camposDinamicos.forEach(function (campo) {
+          // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
+          var indice = campo.id.split('_')[1];
+          if(document.getElementById('dose_' + indice).value){
+
+          var valorAntiCamara = area * 0.8 * indice;  // Exemplo de cálculo para anti_camara
+
+          // Atualize o campo anti_camara com o valor calculado
+          document.getElementById('anti_camara_' + indice).value = valorAntiCamara;
+          campo.value = '-';
+          document.getElementById('campo2_' + indice).value = '-';
+
+          }
+        });
+      }
+      
+    }
+  });
+</script>
   </body>
 
 {% endblock content %}

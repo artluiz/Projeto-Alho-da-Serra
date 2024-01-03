@@ -13,6 +13,7 @@ def todo_home(request):
     atividades = Atividade.objects.all()
     produtos = Produtos.objects.all()
     tipos_irrigador = TipoIrrigador.objects.all()
+    ran = [i for i in range(1, 11)]
 
     context = {
         "estufas": estufas,
@@ -20,6 +21,7 @@ def todo_home(request):
         "produtos": produtos,
         "tipos_irrigador": tipos_irrigador,
         "area": form,
+        "range": ran,
     }
 
     return render(request, "todos/home_page.html", context)
