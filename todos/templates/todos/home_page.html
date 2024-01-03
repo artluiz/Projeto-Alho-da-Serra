@@ -77,28 +77,26 @@
           </div>
       ' </div>
     </div>
-    <form method="POST" class="uniForm">
+    <form method="POST">
       {% csrf_token %}
       <div>
-        <p>Atividade: <select class="campo-selecao">
+        <a>Atividade: <select class="campo-selecao", id="id_atividade">
             {% for atividade in atividades %}
               <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
             {% endfor %}
           </select>
-        </p>
+          <a>Data de Planejamento<input type="date" id="data1"></a>
+        </a>
       </div>
       <div>
-        <p> Estufa: <select class="campo-selecao">
+        <a> Estufa: <select class="campo-selecao", id="id_estufa">
             {% for estufa in estufas %}
               <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
             {% endfor %}
           </select>
-          <p>Área: <input type="numeric" id="id_area" name="area">
-            {% if form.errors.area %}
-              <!-- Não exibir mensagem de erro para o campo 'area' -->
-              {%endif %}
-          </p>
-        </p>
+          <a>Área: <input type="numeric" id="id_area" name="area">
+          </a>
+        </a>
       </div>
       <div>
         <p> Irrigador: <select class="campo-selecao", id="id_tipo_irrigador">
@@ -106,6 +104,7 @@
               <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
             {% endfor %}
           </select>
+          <a>Data da Aplicação<input type="date" id="data2"></a>
         </p>
       </div>
       <table>
@@ -127,6 +126,7 @@
                 <td>{{ i }}</td>
                 <td>
                   <select class="campo-selecao">
+                    <option value=""></option>
                     {% for produto in produtos %}
                       <option value={{ produto.pk }}>{{ produto.nome_produto }}</option>
                     {% endfor %}
@@ -142,83 +142,152 @@
             {% endfor %}
         </tbody>
       </table>
-      <button href="{% url "estufa_list"%}" type="submit" class="btn btn-primary btn-sm">Salvar</button>
+      <button id="enviarDados" type="submit" class="btn btn-primary btn-sm">Salvar</button>
     </form>
 
     <!-- Conteúdo da página continua aqui -->
-  <script defer>
-  document.addEventListener('DOMContentLoaded', function () {
-    var areaInput = document.getElementById('id_area');
-    var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script defer>
+    document.addEventListener('DOMContentLoaded', function () {
+      var areaInput = document.getElementById('id_area');
+      var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
 
-    var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
+      var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
 
-    // Adiciona um ouvinte de evento para o campo de área
-    areaInput.addEventListener('input', function () {
-      atualizarCampos(camposDinamicos);
-    });
-
-    // Adiciona um ouvinte de evento para o campo tipo_irrigador
-    tipoIrrigadorInput.addEventListener('change', function () {
-      atualizarCampos(camposDinamicos);
-    });
-
-    camposDinamicos.forEach(function (campo) {
-    var indice = campo.id.split('_')[1];
-
-    // Adiciona um ouvinte de evento para cada campo "dose_"
-    var doseInput = document.getElementById('dose_' + indice);
-      doseInput.addEventListener('input', function () {
+      // Adiciona um ouvinte de evento para o campo de área
+      areaInput.addEventListener('input', function () {
         atualizarCampos(camposDinamicos);
       });
-    });
 
-    function atualizarDose(indice){
+      // Adiciona um ouvinte de evento para o campo tipo_irrigador
+      tipoIrrigadorInput.addEventListener('change', function () {
+        atualizarCampos(camposDinamicos);
+      });
 
-    }
+      camposDinamicos.forEach(function (campo) {
+      var indice = campo.id.split('_')[1];
 
-    function atualizarCampos(camposDinamicos) {
-      // Obtenha o valor da área
-      var area = parseFloat(areaInput.value) || 0;
-      var tipoIrrigador = tipoIrrigadorInput.value;
-
-      if (tipoIrrigador === '1') {
-        camposDinamicos.forEach(function (campo) {
-          // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
-          var indice = campo.id.split('_')[1];
-          if(document.getElementById('dose_' + indice).value){
-
-          var valorCampo1 = area * indice; //exemplo de cálculo
-          var valorCampo2 = area * 2 * indice;
-
-          // Atualize os campos de entrada com os valores calculados
-          campo.value = valorCampo1;
-          document.getElementById('campo2_' + indice).value = valorCampo2;
-          document.getElementById('anti_camara_' + indice).value = "-";
-
-          }
+      // Adiciona um ouvinte de evento para cada campo "dose_"
+      var doseInput = document.getElementById('dose_' + indice);
+        doseInput.addEventListener('input', function () {
+          atualizarCampos(camposDinamicos);
         });
-      } else {
-        console.log(tipoIrrigador)
-        camposDinamicos.forEach(function (campo) {
-          // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
-          var indice = campo.id.split('_')[1];
-          if(document.getElementById('dose_' + indice).value){
+      });
 
-          var valorAntiCamara = area * 0.8 * indice;  // Exemplo de cálculo para anti_camara
+      function atualizarCampos(camposDinamicos) {
+        // Obtenha o valor da área
+        var area = parseFloat(areaInput.value) || 0;
+        var tipoIrrigador = tipoIrrigadorInput.value;
 
-          // Atualize o campo anti_camara com o valor calculado
-          document.getElementById('anti_camara_' + indice).value = valorAntiCamara;
-          campo.value = '-';
-          document.getElementById('campo2_' + indice).value = '-';
+        if (tipoIrrigador === '1') {
+          camposDinamicos.forEach(function (campo) {
+            // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
+            var indice = campo.id.split('_')[1];
+            if(document.getElementById('dose_' + indice).value){
 
-          }
-        });
+            var valorCampo1 = area * indice; //exemplo de cálculo
+            var valorCampo2 = area * 2 * indice;
+
+            // Atualize os campos de entrada com os valores calculados
+            campo.value = valorCampo1;
+            document.getElementById('campo2_' + indice).value = valorCampo2;
+            document.getElementById('anti_camara_' + indice).value = "-";
+
+            }
+          });
+        } else {
+          console.log(tipoIrrigador)
+          camposDinamicos.forEach(function (campo) {
+            // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
+            var indice = campo.id.split('_')[1];
+            if(document.getElementById('dose_' + indice).value){
+
+            var valorAntiCamara = area * 0.8 * indice;  // Exemplo de cálculo para anti_camara
+
+            // Atualize o campo anti_camara com o valor calculado
+            document.getElementById('anti_camara_' + indice).value = valorAntiCamara;
+            campo.value = '-';
+            document.getElementById('campo2_' + indice).value = '-';
+
+            }
+          });
+        }
+        
       }
-      
-    }
-  });
-</script>
+    });
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script defer>
+      document.addEventListener('DOMContentLoaded', function () {
+        $('#enviarDados').on('click', function () {
+          // Crie um array para armazenar os dados das linhas preenchidas da tabela
+          var dados_tabela = [];
+
+          // Itere sobre as linhas da tabela
+          $('table tbody tr').each(function () {
+            var linha = $(this);
+
+            // Colete os valores dos campos na linha atual
+            var produto = linha.find('select').val();
+            var dose = linha.find('input[id^="dose_"]').val();
+            var campo1 = linha.find('input[id^="campo1_"]').val();
+            var campo2 = linha.find('input[id^="campo2_"]').val();
+            var antiCamara = linha.find('input[id^="anti_camara_"]').val();
+            var previsto = linha.find('input[id^="previsto_"]').val();
+            var total = linha.find('input[id^="total_"]').val();
+
+            // Adicione os dados da linha ao array
+            if (produto || dose || total) {
+                // Adicione os dados da linha ao array
+                dados_tabela.push({
+                    produto: produto,
+                    dose: dose,
+                    campo1: campo1,
+                    campo2: campo2,
+                    antiCamara: antiCamara,
+                    previsto: previsto,
+                    total: total
+                });
+            }
+          });
+
+          // Colete os valores das quatro variáveis
+          var atividade_id = $('#id_atividade option:selected').val();
+          var estufa_id = $('#id_estufa option:selected').val();
+          var area = $('#id_area').val();
+          var irrigador_id = $('#id_tipo_irrigador option:selected').val();
+          var data1 = $('#data1').val();
+          var data2 = $('#data2').val();
+
+          // Crie um objeto de dados com as quatro variáveis e a tabela
+          var dados = {
+            atividade_id: atividade_id,
+            estufa_id: estufa_id,
+            area: area,
+            irrigador_id: irrigador_id,
+            dados_tabela: dados_tabela,
+            data1: data1,
+            data2: data2  
+          };
+
+          // Envie os dados via AJAX
+          $.ajax({
+            url: "{% url 'receber_dados' %}",
+            type: 'post',
+            data: JSON.stringify(dados),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(data){
+              console.log(data);
+            },
+            error: function (error) {
+              console.error(error);
+              // Adicione lógica para lidar com erros, se necessário
+            }
+          });
+        });
+      });
+    </script>
   </body>
 
 {% endblock content %}

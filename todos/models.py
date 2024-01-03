@@ -58,9 +58,8 @@ class FichaDeAplicacao(models.Model):
         verbose_name="Atividade associada", null=False
     )
     estufa_id = models.PositiveIntegerField(verbose_name="Estufa associada", null=False)
-    produto_id = models.PositiveIntegerField(
-        verbose_name="Produto associado", null=False
-    )
+    area = models.DecimalField(verbose_name="Área", decimal_places=4, max_digits=8)
     irrigador_id = models.PositiveIntegerField(
         verbose_name="Irrigador associado", null=False
     )
+    dados = models.JSONField()
