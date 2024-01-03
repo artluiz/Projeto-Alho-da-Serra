@@ -151,24 +151,36 @@
     var areaInput = document.getElementById('id_area');
     var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
 
+    var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
+
     // Adiciona um ouvinte de evento para o campo de área
     areaInput.addEventListener('input', function () {
-      atualizarCampos();
+      atualizarCampos(camposDinamicos);
     });
 
     // Adiciona um ouvinte de evento para o campo tipo_irrigador
     tipoIrrigadorInput.addEventListener('change', function () {
-      atualizarCampos();
+      atualizarCampos(camposDinamicos);
     });
 
-    function atualizarCampos() {
+    camposDinamicos.forEach(function (campo) {
+    var indice = campo.id.split('_')[1];
+
+    // Adiciona um ouvinte de evento para cada campo "dose_"
+    var doseInput = document.getElementById('dose_' + indice);
+      doseInput.addEventListener('input', function () {
+        atualizarCampos(camposDinamicos);
+      });
+    });
+
+    function atualizarDose(indice){
+
+    }
+
+    function atualizarCampos(camposDinamicos) {
       // Obtenha o valor da área
       var area = parseFloat(areaInput.value) || 0;
       var tipoIrrigador = tipoIrrigadorInput.value;
-
-      // Faça o processamento necessário para obter os valores para campo1 e campo2
-      // Substitua isso com sua lógica específica
-      var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
 
       if (tipoIrrigador === '1') {
         camposDinamicos.forEach(function (campo) {
