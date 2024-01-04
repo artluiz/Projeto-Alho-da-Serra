@@ -24,7 +24,7 @@ class Atividade(models.Model):
 
 
 class Produtos(models.Model):
-    nome_produto = models.CharField(
+    produto = models.CharField(
         verbose_name="Produto", max_length=30, null=False, blank=False
     )
     codigo = models.IntegerField(verbose_name="Codigo", null=False)
@@ -43,23 +43,19 @@ class TipoIrrigador(models.Model):
 
 class FichaDeAplicacao(models.Model):
     data_criada = models.DateTimeField(
-        verbose_name="Data de criação", blank=False, auto_now=False, auto_now_add=True
+        verbose_name="Data de criação", blank=False, auto_now=False
     )
-    data_planejada = models.DateTimeField(
+    data_planejada = models.DateField(
         verbose_name="Data da aplicação",
         blank=False,
         auto_now=False,
         auto_now_add=False,
     )
-    data_aplicada = models.DateTimeField(
+    data_aplicada = models.DateField(
         verbose_name="Data real", blank=False, auto_now=False, auto_now_add=False
     )
-    atividade_id = models.PositiveIntegerField(
-        verbose_name="Atividade associada", null=False
-    )
-    estufa_id = models.PositiveIntegerField(verbose_name="Estufa associada", null=False)
     area = models.DecimalField(verbose_name="Área", decimal_places=4, max_digits=8)
-    irrigador_id = models.PositiveIntegerField(
-        verbose_name="Irrigador associado", null=False
-    )
+    estufa = models.ForeignKey(Estufa, on_delete=models.CASCADE)
+    atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
+    irrigador = models.ForeignKey(TipoIrrigador, on_delete=models.CASCADE)
     dados = models.JSONField()

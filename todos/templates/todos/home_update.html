@@ -70,41 +70,53 @@
         <!-- Número da relação e data da operação -->
         <div class="info-container">
           <div class="numero-recomendacao">
-              <p>Número da Recomendação: {{ fcc }}</p>
+              <p>Número da Recomendação: {{ ficha.pk }}</p>
           </div>
           <div class="data-operacao">
               <p>Data da Operação: {% now 'd/m/Y H:i' %}</p>
           </div>
       ' </div>
     </div>
-    <form method="POST">
+    <form method="PUT">
       {% csrf_token %}
       <div>
-        <a>Atividade: <select class="campo-selecao", id="id_atividade">
+        <a>Atividade: 
+          <select class="campo-selecao", id="id_atividade">
+            <option value={{ ficha.atividade.pk }}>{{ficha.atividade.nome}}</option>
             {% for atividade in atividades %}
-              <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+              {% if atividade.pk != ficha.atividade.pk %}
+                <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+              {% endif %}
             {% endfor %}
           </select>
-          <a>Data de Planejamento<input type="date" id="data1"></a>
+          <a>Data de Planejamento<input type="date" id="data1" value="{{ ficha.data_planejada|date:'Y-m-d' }}"></a>
         </a>
       </div>
       <div>
-        <a> Estufa: <select class="campo-selecao", id="id_estufa">
+        <a> Estufa: 
+          <select class="campo-selecao", id="id_estufa">
+            <option value={{ ficha.estufa.pk }}>{{ ficha.estufa.nome_estufa}}</option>
             {% for estufa in estufas %}
-              <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+              {% if estufa.pk != ficha.estufa.pk %}
+                <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+              {% endif %}
             {% endfor %}
           </select>
-          <a>Área: <input type="numeric" id="id_area" name="area">
+          <a>Área: <input type="numeric" id="id_area" name="area" value="{{ ficha.area }}">
           </a>
         </a>
       </div>
       <div>
-        <p> Irrigador: <select class="campo-selecao", id="id_tipo_irrigador">
+        <p> Irrigador: 
+          <select class="campo-selecao", id="id_tipo_irrigador">
+            <option value={{ ficha.irrigador.pk }}>{{ ficha.irrigador.nome_tipo}}</option>
             {% for tipo_irrigador in tipos_irrigador %}
-              <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+              {% if tipo_irrigador.pk != ficha.atividade.pk%}
+                <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+              {% endif %} 
             {% endfor %}
           </select>
-          <a>Data da Aplicação<input type="date" id="data2"></a>
+          <a>Data da Aplicação<input type="date" id="data2" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></a>
         </p>
       </div>
       <table>
@@ -121,30 +133,30 @@
             </tr>
         </thead>
         <tbody>
-            {% for i in range %}
-              <tr>
-                <td>{{ i }}</td>
-                <td>
-                  <select class="campo-selecao">
-                    <option value=""></option>
-                    {% for produto in produtos %}
-                      <option value={{ produto.produto }}>{{ produto.produto }}</option>
-                    {% endfor %}
-                  </select>
-                </td>
-                <td><input type="number" id="dose_{{ i }}"></td>
-                <td><input type="number" id="campo1_{{ i }}" name="campo1_{{ i }}" readonly></td>
-                <td><input type="number" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
-                <td><input type="number" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
-                <td><input type="number" id="previsto_{{ i }}" name="previsto_{{ i }}" readonly></td>
-                <td><input type="number" id="total_{{ i }}"></td>
-              </tr>
-            {% endfor %}
+          {% for ficha in ficha.dados %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                <select class="campo-selecao">
+                  <option value="{{ ficha.produto|default:'' }}">{{ ficha.produto|default:'' }}</option>
+                  {% for produto in produtos %}
+                    <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td><input type="number" id="dose_{{ forloop.counter }}" value = {{ ficha.dose|default:'' }}></td>
+              <td><input type="number" id="campo1_{{ forloop.counter }}" name="campo1_{{ forloop.counter }}" value = {{ ficha.campo1|default:'' }} readonly></td>
+              <td><input type="number" id="campo2_{{ forloop.counter }}" name="campo2_{{ forloop.counter }}" value = {{ ficha.campo2|default:'' }} readonly></td>
+              <td><input type="number" id="anti_camara_{{ forloop.counter }}" name="anti_camara_{{ forloop.counter }}" value = {{ ficha.antiCamara|default:'' }} readonly></td>
+              <td><input type="number" id="previsto_{{ forloop.counter }}" name="previsto_{{ forloop.counter }}" value = {{ ficha.previsto|default:'' }} readonly></td>
+              <td><input type="number" id="total_{{ forloop.counter }}" value = {{ ficha.total|default:'' }}></td>
+            </tr>
+          {% endfor %}
         </tbody>
       </table>
       <button id="enviarDados" type="submit" class="btn btn-primary btn-sm">Salvar</button>
     </form>
-
+    <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-sm"> Voltar</a>
     <!-- Conteúdo da página continua aqui -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script defer>
@@ -258,9 +270,11 @@
           var irrigador_id = $('#id_tipo_irrigador option:selected').val();
           var data1 = $('#data1').val();
           var data2 = $('#data2').val();
+          var ficha_pk = $('#id_da_sua_ficha').val();
 
           // Crie um objeto de dados com as quatro variáveis e a tabela
           var dados = {
+            ficha_pk: ficha_pk,
             atividade_id: atividade_id,
             estufa_id: estufa_id,
             area: area,
@@ -273,7 +287,7 @@
           // Envie os dados via AJAX
           $.ajax({
             url: "{% url 'receber_dados' %}",
-            type: 'post',
+            type: 'put',
             data: JSON.stringify(dados),
             contentType: 'application/json',
             dataType: 'json',

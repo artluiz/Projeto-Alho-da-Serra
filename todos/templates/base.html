@@ -16,10 +16,11 @@
       <div class="container-fluid">
         
         <a class="navbar-brand" href="{% url "home_page"%}">Alho da Serra</a>
-        <a class="navbar-brand" href="{% url "estufa_list"%}" > Estufas</a>
-        <a class="navbar-brand" href="{% url "irrigador_list"%}" > Irrigadores</a>
-        <a class="navbar-brand" href="{% url "produtos_list"%}" > Produtos</a>
-        <a class="navbar-brand" href="{% url "atividade_list"%}" > Atividades</a>
+        <a class="navbar-brand" href="{% url "ficha_list"%}">Histórico</a>
+        <a class="navbar-brand" href="{% url "estufa_list"%}" >Estufas</a>
+        <a class="navbar-brand" href="{% url "irrigador_list"%}">Irrigadores</a>
+        <a class="navbar-brand" href="{% url "produtos_list"%}">Produtos</a>
+        <a class="navbar-brand" href="{% url "atividade_list"%}">Atividades</a>
       </div>
     </nav>
     <main class="container">{% block content %}{% endblock content %}</main>

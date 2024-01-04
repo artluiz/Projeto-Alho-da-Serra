@@ -2,7 +2,10 @@ from django.contrib import admin
 from django.urls import path
 from todos.views import (
     todo_home,
+    todo_update,
+    todo_edit,
     receber_dados,
+    FichaListView,
     EstufaListView,
     EstufaCreateView,
     EstufaUpdateView,
@@ -21,7 +24,10 @@ from todos.views import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", todo_home, name="home_page"),
+    path("update/<int:pk>", todo_update, name="ficha_update"),
+    path("edit/<int:pk>", todo_edit, name="ficha_edit"),
     path("receber_dados/", receber_dados, name="receber_dados"),
+    path("ficha", FichaListView.as_view(), name="ficha_list"),
     path("estufa", EstufaListView.as_view(), name="estufa_list"),
     path("estufa/create/", EstufaCreateView.as_view(), name="estufa_create"),
     path("estufa/update/<int:pk>", EstufaUpdateView.as_view(), name="estufa_update"),
