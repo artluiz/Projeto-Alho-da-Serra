@@ -63,7 +63,7 @@
     <div class="cabecalho">
         <!-- Logo da empresa -->
         <div class="logo-container">
-          <img src="{% static '/todos/images/Yui.jpg' %}" alt="Logo da Empresa" class="logo">
+          <img src="{% static '/todos/images/Yui2.jpg' %}" alt="Logo da Empresa" class="logo">
             <h1>Controle de aplicações</h1>
         </div>
 
@@ -82,7 +82,9 @@
       <div>
         <a>Atividade: <select class="campo-selecao", id="id_atividade">
             {% for atividade in atividades %}
-              <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+              {% if atividade.ativo == 1 %}
+                <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+              {% endif %}
             {% endfor %}
           </select>
           <a>Data de Planejamento<input type="date" id="data1"></a>
@@ -91,7 +93,9 @@
       <div>
         <a> Estufa: <select class="campo-selecao", id="id_estufa">
             {% for estufa in estufas %}
-              <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+              {% if estufa.ativo == 1 %}
+                <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+              {% endif %}
             {% endfor %}
           </select>
           <a>Área: <input type="numeric" id="id_area" name="area">
@@ -101,7 +105,9 @@
       <div>
         <p> Irrigador: <select class="campo-selecao", id="id_tipo_irrigador">
             {% for tipo_irrigador in tipos_irrigador %}
-              <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+              {% if tipo_irrigador.ativo == 1 %}
+                <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+              {% endif %}
             {% endfor %}
           </select>
           <a>Data da Aplicação<input type="date" id="data2"></a>
@@ -128,7 +134,9 @@
                   <select class="campo-selecao">
                     <option value=""></option>
                     {% for produto in produtos %}
-                      <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                      {% if produto.ativo == 1 %}
+                        <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                      {% endif %}
                     {% endfor %}
                   </select>
                 </td>
@@ -185,8 +193,10 @@
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
 
+            var dose = document.getElementById('dose_' + indice).value;
+
             var valorCampo1 = area * indice; //exemplo de cálculo
-            var valorCampo2 = area * 2 * indice;
+            var valorCampo2 = area * dose;
 
             // Atualize os campos de entrada com os valores calculados
             campo.value = valorCampo1;
@@ -239,6 +249,7 @@
             // Adicione os dados da linha ao array
             if (produto || dose || total) {
                 // Adicione os dados da linha ao array
+                console.log(produto);
                 dados_tabela.push({
                     produto: produto,
                     dose: dose,

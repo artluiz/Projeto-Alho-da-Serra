@@ -11,6 +11,7 @@
           <th scope="col">Nome Estufa</th>
           <th scope="col">Área</th>
           <th scope="col">Fazenda</th>
+          <th scope="col">Ativo</th>
           <th scope="col">Ações</th>
         </tr>
       </thead>
@@ -21,6 +22,9 @@
           <td>{{ estufa.nome_estufa }}</td>
           <td>{{ estufa.area }}</td>
           <td>{{ estufa.Fazenda }}</td>
+          <td>
+            <input type="checkbox" {% if estufa.ativo %}checked{% endif %} onclick="location.href='{% url 'estufa_toggle_active' pk=estufa.pk %}'">
+          </td>
           <td>
             <a href="{% url 'estufa_update' pk=estufa.pk %}"
                class="btn btn-secondary btn-sm {% if estufa.data_aplicada %}disabled{% endif %}"

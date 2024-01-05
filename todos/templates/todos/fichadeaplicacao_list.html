@@ -13,6 +13,7 @@
           <th scope="col">Irrigador</th>
           <th scope="col">Data de Planejamento</th>
           <th scope="col">Data de Aplicação</th>
+          <th scope="col">Ativo</th> 
           <th scope="col">Ações</th>
         </tr>
       </thead>
@@ -25,6 +26,9 @@
           <td>{{ ficha.irrigador.nome_tipo }}</td>
           <td>{{ ficha.data_planejada }}</td>
           <td>{{ ficha.data_aplicada }}</td>
+          <td>
+            <input type="checkbox" {% if ficha.ativo %}checked{% endif %} onclick="location.href='{% url 'ficha_toggle_active' pk=ficha.pk %}'">
+          </td>
           <td>
             <a href="{% url 'ficha_update' pk=ficha.pk %}"
                class="btn btn-secondary btn-sm {% if ficha.data_aplicada %}{% endif %}"

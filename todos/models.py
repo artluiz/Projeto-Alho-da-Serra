@@ -59,3 +59,4 @@ class FichaDeAplicacao(models.Model):
     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
     irrigador = models.ForeignKey(TipoIrrigador, on_delete=models.CASCADE)
     dados = models.JSONField()
+    ativo = models.BooleanField(default=True)

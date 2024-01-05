@@ -1,6 +1,6 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
-from django.urls import reverse_lazy
-from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy, reverse
+from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models import Max
@@ -12,6 +12,27 @@ import json
 from .models import Estufa, Atividade, Produtos, TipoIrrigador, FichaDeAplicacao
 
 from django.shortcuts import render
+
+
+def estufa_toggle_active(request, pk):
+    estufa = get_object_or_404(Estufa, pk=pk)
+    estufa.ativo = not estufa.ativo
+    estufa.save()
+    return redirect(reverse("estufa_list"))
+
+
+def ficha_toggle_active(request, pk):
+    ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
+    ficha.ativo = not ficha.ativo
+    ficha.save()
+    return redirect(reverse("ficha_list"))
+
+
+def produto_toggle_active(request, pk):
+    produto = get_object_or_404(Produtos, pk=pk)
+    produto.ativo = not produto.ativo
+    produto.save()
+    return redirect(reverse("produtos_list"))
 
 
 def todo_home(request):
@@ -101,6 +122,7 @@ def receber_dados(request):
         data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         data_aplicada = datetime.strptime(dados["data2"], "%Y-%m-%d")
 
+        area = area.replace(",", ".")
         data_planejada = pytz.timezone("America/Sao_Paulo").localize(data_planejada)
         data_aplicada = pytz.timezone("America/Sao_Paulo").localize(data_aplicada)
 
@@ -115,6 +137,42 @@ def receber_dados(request):
             data_planejada=data_planejada,
             data_aplicada=data_aplicada,
         )
+        ficha_aplicacao.save()
+
+        return JsonResponse({"status": "success"}, safe=False)
+    else:
+        return JsonResponse({"status": "fail"}, safe=False)
+
+
+@csrf_exempt
+def atualizar_dados(request):
+    if request.method == "PUT":
+        print(request.body)
+        # Decodifique os bytes para uma string e carregue o JSON
+        dados = json.loads(request.body.decode("utf-8"))
+
+        # Obtenha a ficha existente pelo id
+        ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=dados["ficha_pk"])
+
+        # Atualize os campos desejados
+        ficha_aplicacao.atividade = Atividade.objects.get(pk=(dados["atividade_id"]))
+        ficha_aplicacao.estufa = Estufa.objects.get(pk=(dados["estufa_id"]))
+        ficha_aplicacao.area = dados["area"].replace(",", ".")
+        ficha_aplicacao.irrigador = TipoIrrigador.objects.get(
+            pk=(dados["irrigador_id"])
+        )
+        ficha_aplicacao.dados = dados["dados_tabela"]
+        ficha_aplicacao.data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
+        ficha_aplicacao.data_aplicada = datetime.strptime(dados["data2"], "%Y-%m-%d")
+
+        ficha_aplicacao.data_planejada = pytz.timezone("America/Sao_Paulo").localize(
+            ficha_aplicacao.data_planejada
+        )
+        ficha_aplicacao.data_aplicada = pytz.timezone("America/Sao_Paulo").localize(
+            ficha_aplicacao.data_aplicada
+        )
+
+        # Salve a instância para atualizar o banco de dados
         ficha_aplicacao.save()
 
         return JsonResponse({"status": "success"}, safe=False)

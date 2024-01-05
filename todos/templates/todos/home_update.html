@@ -63,13 +63,13 @@
     <div class="cabecalho">
         <!-- Logo da empresa -->
         <div class="logo-container">
-          <img src="{% static '/todos/images/Yui.jpg' %}" alt="Logo da Empresa" class="logo">
+          <img src="{% static '/todos/images/teste.jpg' %}" alt="Logo da Empresa" class="logo">
             <h1>Controle de aplicações</h1>
         </div>
 
         <!-- Número da relação e data da operação -->
         <div class="info-container">
-          <div class="numero-recomendacao">
+          <div class="numero-recomendacao" id="meuElemento" data-ficha-pk="{{ ficha.pk }}">
               <p>Número da Recomendação: {{ ficha.pk }}</p>
           </div>
           <div class="data-operacao">
@@ -85,7 +85,9 @@
             <option value={{ ficha.atividade.pk }}>{{ficha.atividade.nome}}</option>
             {% for atividade in atividades %}
               {% if atividade.pk != ficha.atividade.pk %}
-                <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+                    {% if atividade.ativo == 1 %}
+                      <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+                    {% endif %}
               {% endif %}
             {% endfor %}
           </select>
@@ -98,7 +100,9 @@
             <option value={{ ficha.estufa.pk }}>{{ ficha.estufa.nome_estufa}}</option>
             {% for estufa in estufas %}
               {% if estufa.pk != ficha.estufa.pk %}
-                <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+                    {% if estufa.ativo == 1 %}
+                      <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+                    {% endif %}
               {% endif %}
             {% endfor %}
           </select>
@@ -111,8 +115,10 @@
           <select class="campo-selecao", id="id_tipo_irrigador">
             <option value={{ ficha.irrigador.pk }}>{{ ficha.irrigador.nome_tipo}}</option>
             {% for tipo_irrigador in tipos_irrigador %}
-              {% if tipo_irrigador.pk != ficha.atividade.pk%}
-                <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+              {% if tipo_irrigador.pk != ficha.irrigador.pk%}
+                    {% if tipo_irrigador.ativo == 1 %}
+                      <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+                    {% endif %}
               {% endif %} 
             {% endfor %}
           </select>
@@ -140,7 +146,9 @@
                 <select class="campo-selecao">
                   <option value="{{ ficha.produto|default:'' }}">{{ ficha.produto|default:'' }}</option>
                   {% for produto in produtos %}
-                    <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                    {% if produto.ativo == 1 %}
+                      <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                    {% endif %}
                   {% endfor %}
                 </select>
               </td>
@@ -197,8 +205,10 @@
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
 
+            var dose = document.getElementById('dose_' + indice).value;
+
             var valorCampo1 = area * indice; //exemplo de cálculo
-            var valorCampo2 = area * 2 * indice;
+            var valorCampo2 = area * dose;
 
             // Atualize os campos de entrada com os valores calculados
             campo.value = valorCampo1;
@@ -249,7 +259,7 @@
             var total = linha.find('input[id^="total_"]').val();
 
             // Adicione os dados da linha ao array
-            if (produto || dose || total) {
+            if (produto && dose || total) {
                 // Adicione os dados da linha ao array
                 dados_tabela.push({
                     produto: produto,
@@ -270,11 +280,10 @@
           var irrigador_id = $('#id_tipo_irrigador option:selected').val();
           var data1 = $('#data1').val();
           var data2 = $('#data2').val();
-          var ficha_pk = $('#id_da_sua_ficha').val();
+          var ficha_pk = $('#meuElemento').data('ficha-pk');
 
           // Crie um objeto de dados com as quatro variáveis e a tabela
           var dados = {
-            ficha_pk: ficha_pk,
             atividade_id: atividade_id,
             estufa_id: estufa_id,
             area: area,
@@ -282,18 +291,19 @@
             dados_tabela: dados_tabela,
             data1: data1,
             data2: data2,
+            ficha_pk: ficha_pk,
           };
 
           // Envie os dados via AJAX
           $.ajax({
-            url: "{% url 'receber_dados' %}",
+            url: "{% url 'atualizar_dados' %}",
             type: 'put',
             data: JSON.stringify(dados),
             contentType: 'application/json',
             dataType: 'json',
             success: function(data){
               console.log(data);
-              window.location.reload(true);
+              window.location.href="{% url "ficha_list"%}";
             },
             error: function (error) {
               console.error(error);

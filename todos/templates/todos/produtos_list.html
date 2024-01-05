@@ -11,6 +11,7 @@
           <th scope="col">Nome da Produto</th>
           <th scope="col">Codigo</th>
           <th scope="col">Descrição</th>
+          <th scope="col">Ativo</th> 
           <th scope="col">Ações</th>
         </tr>
       </thead>
@@ -21,6 +22,9 @@
           <td>{{ produto.produto }}</td>
           <td>{{ produto.codigo }}</td>
           <td>{{ produto.descricao }}</td>
+          <td>
+            <input type="checkbox" {% if produto.ativo %}checked{% endif %} onclick="location.href='{% url 'produto_toggle_active' pk=produto.pk %}'">
+          </td>
           <td>
             <a href="{% url 'produtos_update' pk=produto.pk %}"
                class="btn btn-secondary btn-sm {% if produto.data_aplicada %}disabled{% endif %}"
