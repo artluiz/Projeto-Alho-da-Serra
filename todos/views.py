@@ -122,7 +122,6 @@ def receber_dados(request):
         data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         data_aplicada = datetime.strptime(dados["data2"], "%Y-%m-%d")
 
-        area = area.replace(",", ".")
         data_planejada = pytz.timezone("America/Sao_Paulo").localize(data_planejada)
         data_aplicada = pytz.timezone("America/Sao_Paulo").localize(data_aplicada)
 
@@ -157,7 +156,8 @@ def atualizar_dados(request):
         # Atualize os campos desejados
         ficha_aplicacao.atividade = Atividade.objects.get(pk=(dados["atividade_id"]))
         ficha_aplicacao.estufa = Estufa.objects.get(pk=(dados["estufa_id"]))
-        ficha_aplicacao.area = dados["area"].replace(",", ".")
+        # ficha_aplicacao.area = dados["area"].replace(",", ".")
+        ficha_aplicacao.area = dados["area"]
         ficha_aplicacao.irrigador = TipoIrrigador.objects.get(
             pk=(dados["irrigador_id"])
         )

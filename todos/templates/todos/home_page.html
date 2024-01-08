@@ -6,6 +6,7 @@
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
+        font-size: 1.25em;
       }
 
       .cabecalho {
@@ -17,10 +18,11 @@
       .logo-container {
           display: flex;
           align-items: center;
+          font-size: 1.5em;
       }
 
       .logo {
-          max-width: 100px;  /* Ajuste conforme necessário */
+          max-width: 200px;  /* Ajuste conforme necessário */
           margin-right: 10px;  /* Espaço entre o logo e o texto "Controle de aplicações" */
       }
       
@@ -63,17 +65,17 @@
     <div class="cabecalho">
         <!-- Logo da empresa -->
         <div class="logo-container">
-          <img src="{% static '/todos/images/Yui2.jpg' %}" alt="Logo da Empresa" class="logo">
+          <img src="{% static '/todos/images/logo.jpeg' %}" alt="Logo da Empresa" class="logo">
             <h1>Controle de aplicações</h1>
         </div>
 
         <!-- Número da relação e data da operação -->
         <div class="info-container">
           <div class="numero-recomendacao">
-              <p>Número da Recomendação: {{ fcc }}</p>
+              <h2>N ̊ da Recomendação: {{ fcc }}</h2>
           </div>
           <div class="data-operacao">
-              <p>Data da Operação: {% now 'd/m/Y H:i' %}</p>
+              <h2>Data da Operação: {% now 'd/m/Y H:i' %}</h2>
           </div>
       ' </div>
     </div>
@@ -92,13 +94,15 @@
       </div>
       <div>
         <a> Estufa: <select class="campo-selecao", id="id_estufa">
+            <option value=""></option>
             {% for estufa in estufas %}
               {% if estufa.ativo == 1 %}
-                <option value={{ estufa.pk }}>{{ estufa.nome_estufa }}</option>
+                <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.Fazenda }}">{{ estufa.nome_estufa }}</option>
               {% endif %}
             {% endfor %}
           </select>
-          <a>Área: <input type="numeric" id="id_area" name="area">
+          <a>Área: <span id="id_area" name="area">0,000</span>
+          <a>fazenda: <span id="id_fazenda" name="fazenda">Selecione uma estufa.</span>
           </a>
         </a>
       </div>
@@ -156,14 +160,32 @@
     <!-- Conteúdo da página continua aqui -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script defer>
+    
     document.addEventListener('DOMContentLoaded', function () {
-      var areaInput = document.getElementById('id_area');
+      var areaSpan = document.getElementById('id_area');
       var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
 
       var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
 
+      document.getElementById('id_estufa').addEventListener('change', function () {
+        var selectedOption = this.options[this.selectedIndex];
+        var areaSelecionada = selectedOption.getAttribute('data-area');
+        var fazendaSelecionada = selectedOption.getAttribute('data-fazenda');
+
+        // Atualize a área exibida
+        document.getElementById('id_area').innerText = areaSelecionada;
+        document.getElementById('id_fazenda').innerText = fazendaSelecionada;
+
+        atualizarCampos(camposDinamicos);
+      });
+
       // Adiciona um ouvinte de evento para o campo de área
-      areaInput.addEventListener('input', function () {
+      areaSpan.addEventListener('change', function () {
+        var selectedOption = this.options[this.selectedIndex];
+        var areaSelecionada = selectedOption.getAttribute('data-area');
+        
+        // Atualize a área exibida
+        document.getElementById('area_selecionada').innerText = areaSelecionada || "Nenhuma área selecionada";
         atualizarCampos(camposDinamicos);
       });
 
@@ -184,8 +206,10 @@
 
       function atualizarCampos(camposDinamicos) {
         // Obtenha o valor da área
-        var area = parseFloat(areaInput.value) || 0;
+        var area = parseFloat(areaSpan.innerText.replace(',', '.')) || 0;
         var tipoIrrigador = tipoIrrigadorInput.value;
+
+        console.log(area)
 
         if (tipoIrrigador === '1') {
           camposDinamicos.forEach(function (campo) {
@@ -229,6 +253,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script defer>
       document.addEventListener('DOMContentLoaded', function () {
+        var areaSpan = document.getElementById('id_area');
         $('#enviarDados').on('click', function () {
           // Crie um array para armazenar os dados das linhas preenchidas da tabela
           var dados_tabela = [];
@@ -265,7 +290,7 @@
           // Colete os valores das quatro variáveis
           var atividade_id = $('#id_atividade option:selected').val();
           var estufa_id = $('#id_estufa option:selected').val();
-          var area = $('#id_area').val();
+          var area = parseFloat(areaSpan.innerText.replace(',', '.'));
           var irrigador_id = $('#id_tipo_irrigador option:selected').val();
           var data1 = $('#data1').val();
           var data2 = $('#data2').val();

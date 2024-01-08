@@ -10,7 +10,7 @@ class Estufa(models.Model):
     Fazenda = models.CharField(
         verbose_name="Fazenda", max_length=50, null=False, blank=False
     )
-    ativo = models.BooleanField()
+    ativo = models.BooleanField(default=True)
 
 
 class Atividade(models.Model):
@@ -20,7 +20,7 @@ class Atividade(models.Model):
     # descicao = models.CharField(
     #    verbose_name="Descrição", max_length=100, null=False, blank=False
     # )
-    ativo = models.BooleanField()
+    ativo = models.BooleanField(default=True)
 
 
 class Produtos(models.Model):
@@ -31,14 +31,14 @@ class Produtos(models.Model):
     descricao = models.CharField(
         verbose_name="Descrição", max_length=100, null=False, blank=False
     )
-    ativo = models.BooleanField()
+    ativo = models.BooleanField(default=True)
 
 
 class TipoIrrigador(models.Model):
     nome_tipo = models.CharField(
         verbose_name="Irrigador", max_length=50, null=False, blank=False
     )
-    ativo = models.BooleanField()
+    ativo = models.BooleanField(default=True)
 
 
 class FichaDeAplicacao(models.Model):
