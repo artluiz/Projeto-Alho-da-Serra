@@ -14,6 +14,43 @@ from .models import Estufa, Atividade, Produtos, TipoIrrigador, FichaDeAplicacao
 from django.shortcuts import render
 
 
+class FichaFiltro(ListView):
+    model = FichaDeAplicacao
+    template_name = "fichadeaplicacao_list.html"
+    context_object_name = (
+        "fichadeaplicacao_list"  # Nome da variável de contexto na template
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Adicione os objetos Estufa, Atividade e TipoIrrigador ao contexto
+        context["estufas"] = Estufa.objects.all()
+        context["atividades"] = Atividade.objects.all()
+        context["tipo_irrigadores"] = TipoIrrigador.objects.all()
+
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        data_filter = self.request.GET.get("data_filter")
+        atividade_filter = self.request.GET.get("atividade_filter")
+        estufa_filter = self.request.GET.get("estufa_filter")
+
+        # Adicione lógica para filtrar o queryset com base nos parâmetros fornecidos
+        if data_filter:
+            queryset = queryset.filter(data_criada__date=data_filter)
+
+        if atividade_filter:
+            queryset = queryset.filter(atividade__id=atividade_filter)
+
+        if estufa_filter:
+            queryset = queryset.filter(estufa__id=estufa_filter)
+
+        return queryset
+
+
 def estufa_toggle_active(request, pk):
     estufa = get_object_or_404(Estufa, pk=pk)
     estufa.ativo = not estufa.ativo

@@ -3,6 +3,8 @@
     <style>
       /* Exemplo de estilo básico, personalize conforme necessário */
       body {
+        margin-right: 30px;
+        margin-left: 30px;
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
@@ -10,12 +12,15 @@
       }
 
       .cabecalho {
+        margin-right: 30px;
+        margin-left: 30px;
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
 
       .logo-container {
+          margin-left: 30px;
           display: flex;
           align-items: center;
           font-size: 1.5em;
@@ -27,6 +32,7 @@
       }
       
       .info-container {
+          margin-left: 30px;
           margin-top: 20px;
           display: flex;
           flex-direction: column;  /* Empilhe os elementos verticalmente */
@@ -82,19 +88,20 @@
     <form method="POST">
       {% csrf_token %}
       <div>
-        <a>Atividade: <select class="campo-selecao", id="id_atividade">
+        <a>Atividade: <select class="campo-selecao", id="id_atividade" required>
+            <option value="">Selecione uma opção</option>
             {% for atividade in atividades %}
               {% if atividade.ativo == 1 %}
                 <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
               {% endif %}
             {% endfor %}
           </select>
-          <a>Data de Planejamento<input type="date" id="data1"></a>
+          <a>Data de Planejamento<input type="date" id="data1" required></a>
         </a>
       </div>
       <div>
-        <a> Estufa: <select class="campo-selecao", id="id_estufa">
-            <option value=""></option>
+        <a> Estufa: <select class="campo-selecao", id="id_estufa" required>
+            <option value="">Selecione uma opção</option>
             {% for estufa in estufas %}
               {% if estufa.ativo == 1 %}
                 <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.Fazenda }}">{{ estufa.nome_estufa }}</option>
@@ -107,7 +114,8 @@
         </a>
       </div>
       <div>
-        <p> Irrigador: <select class="campo-selecao", id="id_tipo_irrigador">
+        <p> Irrigador: <select class="campo-selecao", id="id_tipo_irrigador" required>
+            <option value="">Selecione uma opção</option>
             {% for tipo_irrigador in tipos_irrigador %}
               {% if tipo_irrigador.ativo == 1 %}
                 <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
@@ -135,7 +143,7 @@
               <tr>
                 <td>{{ i }}</td>
                 <td>
-                  <select class="campo-selecao">
+                  <select class="campo-selecao" required>
                     <option value=""></option>
                     {% for produto in produtos %}
                       {% if produto.ativo == 1 %}
@@ -144,12 +152,12 @@
                     {% endfor %}
                   </select>
                 </td>
-                <td><input type="number" id="dose_{{ i }}"></td>
+                <td><input type="number" id="dose_{{ i }}" required></td>
                 <td><input type="number" id="campo1_{{ i }}" name="campo1_{{ i }}" readonly></td>
                 <td><input type="number" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
                 <td><input type="number" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
                 <td><input type="number" id="previsto_{{ i }}" name="previsto_{{ i }}" readonly></td>
-                <td><input type="number" id="total_{{ i }}"></td>
+                <td><input type="number" id="total_{{ i }}" required></td>
               </tr>
             {% endfor %}
         </tbody>
@@ -315,7 +323,6 @@
             dataType: 'json',
             success: function(data){
               console.log(data);
-              window.location.reload(true);
             },
             error: function (error) {
               console.error(error);

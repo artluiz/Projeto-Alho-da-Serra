@@ -3,6 +3,28 @@
 {% block page_title %} Histórico {% endblock page_title %}
 
 {% block content %}
+    <form method="get" action="{% url 'ficha_filtro' %}" >
+        <label for="data_filter">Filtrar por Data:</label>
+        <input type="date" id="data_filter" name="data_filter">
+
+        <label for="atividade_filter">Filtrar por Atividade:</label>
+        <select id="atividade_filter" name="atividade_filter">
+            <option value="" selected>Selecione uma Atividade</option>
+            {% for atividade in atividades %}
+                <option value="{{ atividade.id }}">{{ atividade.nome }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="estufa_filter">Filtrar por Estufa:</label>
+        <select id="estufa_filter" name="estufa_filter">
+            <option value="" selected>Selecione uma Estufa</option>
+            {% for estufa in estufas %}
+                <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+    </form>
     {% if fichadeaplicacao_list %}
     <table class="table">
       <thead>

@@ -1,18 +1,17 @@
 {% extends "base.html" %} {% load static %}
 {% block content %} {% load tz %} 
     <style>
-      /* Exemplo de estilo básico, personalize conforme necessário */
       body {
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
+        font-size: 1.25em;
       }
 
       .cabecalho {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 1.2em;
       }
 
       .logo-container {
@@ -21,28 +20,28 @@
       }
 
       .logo {
-          max-width: 100px;  /* Ajuste conforme necessário */
-          margin-right: 10px;  /* Espaço entre o logo e o texto "Controle de aplicações" */
+          max-width: 200px;  
+          margin-right: 10px;  
       }
       
       .info-container {
           margin-top: 20px;
           display: flex;
-          flex-direction: column;  /* Empilhe os elementos verticalmente */
+          flex-direction: column;  
           align-items: center;
       }
 
       .numero-recomendacao,
       .data-operacao {
-          margin-bottom: 5px;  /* Adicione um espaçamento entre os parágrafos */
+          margin-bottom: 5px;  
       }
       a {
-        font-size: 24px;
+        /*font-size: 24px;*/
       }
 
       p {
-          font-size: 24px;
-          margin: 0;  /* Remova a margem padrão dos parágrafos para evitar espaços indesejados */
+          /*font-size: 24px;*/
+          margin: 0;  
       }
 
       .campo-selecao {
@@ -68,9 +67,9 @@
   <body>
     <div class="cabecalho">
         <!-- Logo da empresa -->
-        <div class="logo-container" style="font-size: 30px;">
+        <div class="logo-container" >
           <img src="{% static '/todos/images/logo.jpeg' %}" alt="Logo da Empresa" class="logo">
-            <h1>Controle de aplicações</h1>
+            <h1 style="font-size: 50px;">Controle de aplicações</h1>
         </div>
 
         <!-- Número da relação e data da operação -->
