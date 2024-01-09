@@ -1,41 +1,52 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% load crispy_forms_tags %}
 
 {% block page_title %} Histórico {% endblock page_title %}
 
 {% block content %}
-    <form method="get" action="{% url 'ficha_filtro' %}" >
-        <label for="data_filter">Filtrar por Data:</label>
-        <input type="date" id="data_filter" name="data_filter">
-
-        <label for="atividade_filter">Filtrar por Atividade:</label>
-        <select id="atividade_filter" name="atividade_filter">
-            <option value="" selected>Selecione uma Atividade</option>
-            {% for atividade in atividades %}
-                <option value="{{ atividade.id }}">{{ atividade.nome }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="estufa_filter">Filtrar por Estufa:</label>
-        <select id="estufa_filter" name="estufa_filter">
-            <option value="" selected>Selecione uma Estufa</option>
-            {% for estufa in estufas %}
-                <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
-            {% endfor %}
-        </select>
-
-        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
-    </form>
+    <form method="get" action="{% url 'ficha_filtro' %}" class="form-inline mt-3" fixed-form>
+    <div class="input-group input-group-lg">
+      <label class="input-group-text" id="basic-addon1" for="data_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Data:</label>
+      <input type="date" id="data_filter" name="data_filter" class="form-control" style="max-width: 500px;">
+      
+      <label class="input-group-text" id="basic-addon1" for="atividade_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Atividade:</label>
+      <select id="atividade_filter" name="atividade_filter" class="form-control" style="max-width: 500px;">
+          <option value="" selected>Selecione uma Atividade</option>
+          {% for atividade in atividades %}
+              <option value="{{ atividade.id }}">{{ atividade.nome }}</option>
+          {% endfor %}
+      </select>
+      
+      <label class="input-group-text" id="basic-addon1" for="estufa_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Estufa:</label>
+      <select id="estufa_filter" name="estufa_filter" class="form-control" style="max-width: 500px;">
+          <option value="" selected>Selecione uma Estufa</option>
+          {% for estufa in estufas %}
+              <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
+          {% endfor %}
+      </select>
+    </div>
+    <div class="input-group input-group-lg">
+    <label class="input-group-text" id="basic-addon1" for="status_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Status:</label>
+      <select class="form-select" id="status_filter"  name="status_filter" style="max-width: 500px;">
+          <option value="" selected>Selecione um Status</option>
+          <option value="true" {% if request.GET.status_filter == 'true' %}selected{% endif %}>Pendente</option>
+          <option value="false" {% if request.GET.status_filter == 'false' %}selected{% endif %}>Concluída</option>
+      </select>
+    </div>
+    <div class="input-group input-group-lg">
+      <button type="submit" class="btn btn-primary btn position-absolute bottom-0 end-0" >Filtrar</button>
+    </div>
+</form>
     {% if fichadeaplicacao_list %}
-    <table class="table">
+    <table class="table fs-5">
       <thead>
         <tr>
           <th scope="col">#</th>
           <th scope="col">Estufa</th>
           <th scope="col">Atividade</th>
           <th scope="col">Irrigador</th>
-          <th scope="col">Data de Planejamento</th>
+          <th scope="col">Data de Criação</th>
           <th scope="col">Data de Aplicação</th>
-          <th scope="col">Ativo</th> 
+          <th scope="col">Concluído</th> 
           <th scope="col">Ações</th>
         </tr>
       </thead>
@@ -46,18 +57,19 @@
           <td>{{ ficha.estufa.nome_estufa }}</td>
           <td>{{ ficha.atividade.nome }}</td>
           <td>{{ ficha.irrigador.nome_tipo }}</td>
-          <td>{{ ficha.data_planejada }}</td>
+          <td>{{ ficha.data_criada }}</td>
           <td>{{ ficha.data_aplicada }}</td>
           <td>
-            <input type="checkbox" {% if ficha.ativo %}checked{% endif %} onclick="location.href='{% url 'ficha_toggle_active' pk=ficha.pk %}'">
+            <input type="checkbox" {% if ficha.pendente %}checked{% endif %} onclick="location.href='{% url 'ficha_toggle_pendente' pk=ficha.pk %}'">
           </td>
           <td>
             <a href="{% url 'ficha_update' pk=ficha.pk %}"
-               class="btn btn-secondary btn-sm {% if ficha.data_aplicada %}{% endif %}"
+               class="btn btn-secondary btn {% if ficha.data_aplicada %}{% endif %}"
             >
               Editar
             </a>
-            <a href="{% url 'atividade_delete' pk=ficha.pk %}" class="btn btn-danger btn-sm">Excluír</a>
+            <a href="{% url 'ficha_toggle_active' pk=ficha.pk %}" {% if  ficha.ativo %}class="btn btn-danger btn"{% else %}class="btn btn-success btn"{% endif %} 
+            >{% if ficha.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>
           </td>
         </tr>
         {% endfor %}
@@ -66,6 +78,6 @@
     {% else %}
     <p>Não há fichas cadastradas</p>
     {% endif %}
-    <a href="{% url "home_page"%}" class="btn btn-primary btn-sm"> Cadastrar Ficha</a>
+    <a href="{% url "home_page"%}" class="btn btn-primary btn-lg"> Cadastrar Ficha</a>
     {% endblock content %}
     

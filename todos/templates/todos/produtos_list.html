@@ -4,14 +4,13 @@
 
 {% block content %}
     {% if produtos_list %}
-    <table class="table">
+    <table class="table fs-5">
       <thead>
         <tr>
           <th scope="col">#</th>
           <th scope="col">Nome da Produto</th>
           <th scope="col">Codigo</th>
           <th scope="col">Descrição</th>
-          <th scope="col">Ativo</th> 
           <th scope="col">Ações</th>
         </tr>
       </thead>
@@ -23,15 +22,13 @@
           <td>{{ produto.codigo }}</td>
           <td>{{ produto.descricao }}</td>
           <td>
-            <input type="checkbox" {% if produto.ativo %}checked{% endif %} onclick="location.href='{% url 'produto_toggle_active' pk=produto.pk %}'">
-          </td>
-          <td>
             <a href="{% url 'produtos_update' pk=produto.pk %}"
-               class="btn btn-secondary btn-sm {% if produto.data_aplicada %}disabled{% endif %}"
+               class="btn btn-secondary btn {% if produto.data_aplicada %}disabled{% endif %}"
             >
               Editar
             </a>
-            <a href="{% url 'produtos_delete' pk=produto.pk %}" class="btn btn-danger btn-sm">Excluír</a>
+            <a href="{% url 'produto_toggle_active' pk=produto.pk %}" {% if  produto.ativo %}class="btn btn-danger btn"{% else %}class="btn btn-success btn"{% endif %} 
+            >{% if produto.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>
           </td>
         </tr>
         {% endfor %}
@@ -40,6 +37,6 @@
     {% else %}
     <p>Não há Produtos cadastradas</p>
     {% endif %}
-    <a href="{% url "produtos_create"%}" class="btn btn-primary btn-sm"> Cadastrar produto</a>
+    <a href="{% url "produtos_create"%}" class="btn btn-primary btn-lg"> Cadastrar produto</a>
     {% endblock content %}
     

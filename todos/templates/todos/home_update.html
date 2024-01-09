@@ -75,7 +75,7 @@
         <!-- Número da relação e data da operação -->
         <div class="info-container">
           <div class="numero-recomendacao" id="meuElemento" data-ficha-pk="{{ ficha.pk }}">
-              <h2>N ̊ da Recomendação: {{ ficha.pk }}<h2/>
+              <h2>N ̊ da Recomendação: E{{ ficha.pk }}<h2/>
           </div>
           <div class="data-operacao">
               <h2>Data da Operação: {% now 'd/m/Y H:i' %}</h2>
@@ -96,7 +96,7 @@
               {% endif %}
             {% endfor %}
           </select>
-          <a style="">Data de Planejamento<input type="date" id="data1" value="{{ ficha.data_planejada|date:'Y-m-d' }}"></a>
+          <a>Data da Aplicação<input type="date" id="data2" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></a>
         </a>
       </div>
       <div>
@@ -111,7 +111,7 @@
             {% endfor %}
           </select>
           <a>Área: <span id="id_area" name="area">{{ ficha.area }}</span>
-          <a>fazenda: <span id="id_fazenda" name="fazenda">{{ ficha.estufa.Fazenda}}</span>
+          <a>Fazenda: <span id="id_fazenda" name="fazenda">{{ ficha.estufa.Fazenda}}</span>
           </a>
         </a>
       </div>
@@ -127,7 +127,6 @@
               {% endif %} 
             {% endfor %}
           </select>
-          <a>Data da Aplicação<input type="date" id="data2" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></a>
         </p>
       </div>
       <table>
@@ -167,16 +166,15 @@
           {% endfor %}
         </tbody>
       </table>
-      <button id="enviarDados" type="submit" class="btn btn-primary btn-sm">Salvar</button>
+      <button id="enviarDados" type="submit" class="btn btn-primary btn-lg">Salvar</button>
     </form>
-    <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-sm"> Voltar</a>
+    <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-lg"> Voltar</a>
     <!-- Conteúdo da página continua aqui -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script defer>
     document.addEventListener('DOMContentLoaded', function () {
       var areaSpan = document.getElementById('id_area');
       var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
-
       var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
 
       document.getElementById('id_estufa').addEventListener('change', function () {
@@ -301,8 +299,7 @@
           var estufa_id = $('#id_estufa option:selected').val();
           var area = parseFloat(areaSpan.innerText.replace(',', '.'));
           var irrigador_id = $('#id_tipo_irrigador option:selected').val();
-          var data1 = $('#data1').val();
-          var data2 = $('#data2').val();
+          var data = $('#data2').val();
           var ficha_pk = $('#meuElemento').data('ficha-pk');
 
           // Crie um objeto de dados com as quatro variáveis e a tabela
@@ -312,8 +309,7 @@
             area: area,
             irrigador_id: irrigador_id,
             dados_tabela: dados_tabela,
-            data1: data1,
-            data2: data2,
+            data: data,
             ficha_pk: ficha_pk,
           };
 

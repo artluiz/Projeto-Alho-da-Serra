@@ -1,4 +1,11 @@
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
+from django.views.generic import (
+    ListView,
+    CreateView,
+    UpdateView,
+    DeleteView,
+    View,
+    DetailView,
+)
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -17,9 +24,7 @@ from django.shortcuts import render
 class FichaFiltro(ListView):
     model = FichaDeAplicacao
     template_name = "fichadeaplicacao_list.html"
-    context_object_name = (
-        "fichadeaplicacao_list"  # Nome da variável de contexto na template
-    )
+    context_object_name = "fichadeaplicacao_list"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -37,6 +42,7 @@ class FichaFiltro(ListView):
         data_filter = self.request.GET.get("data_filter")
         atividade_filter = self.request.GET.get("atividade_filter")
         estufa_filter = self.request.GET.get("estufa_filter")
+        status_filter = self.request.GET.get("status_filter")
 
         # Adicione lógica para filtrar o queryset com base nos parâmetros fornecidos
         if data_filter:
@@ -47,6 +53,12 @@ class FichaFiltro(ListView):
 
         if estufa_filter:
             queryset = queryset.filter(estufa__id=estufa_filter)
+
+        if status_filter is not None:
+            if status_filter == "true":
+                queryset = queryset.filter(pendente=True)
+            elif status_filter == "false":
+                queryset = queryset.filter(pendente=False)
 
         return queryset
 
@@ -61,6 +73,13 @@ def estufa_toggle_active(request, pk):
 def ficha_toggle_active(request, pk):
     ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
     ficha.ativo = not ficha.ativo
+    ficha.save()
+    return redirect(reverse("ficha_list"))
+
+
+def ficha_toggle_pendente(request, pk):
+    ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
+    ficha.pendente = not ficha.pendente
     ficha.save()
     return redirect(reverse("ficha_list"))
 
@@ -156,10 +175,11 @@ def receber_dados(request):
         irrigador_id = TipoIrrigador.objects.get(pk=(dados["irrigador_id"]))
         dados_tabela = dados["dados_tabela"]
         data_criada = timezone.now().astimezone(pytz.timezone("America/Sao_Paulo"))
-        data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
-        data_aplicada = datetime.strptime(dados["data2"], "%Y-%m-%d")
 
-        data_planejada = pytz.timezone("America/Sao_Paulo").localize(data_planejada)
+        # data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
+        data_aplicada = datetime.strptime(dados["data1"], "%Y-%m-%d")
+
+        # data_planejada = pytz.timezone("America/Sao_Paulo").localize(data_planejada)
         data_aplicada = pytz.timezone("America/Sao_Paulo").localize(data_aplicada)
 
         # Crie uma nova instância do modelo FichaDeAplicacao e salve-a no banco de dados
@@ -170,7 +190,7 @@ def receber_dados(request):
             area=area,
             irrigador=irrigador_id,
             dados=dados_tabela,
-            data_planejada=data_planejada,
+            # data_planejada=data_planejada,
             data_aplicada=data_aplicada,
         )
         ficha_aplicacao.save()
@@ -199,12 +219,12 @@ def atualizar_dados(request):
             pk=(dados["irrigador_id"])
         )
         ficha_aplicacao.dados = dados["dados_tabela"]
-        ficha_aplicacao.data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
-        ficha_aplicacao.data_aplicada = datetime.strptime(dados["data2"], "%Y-%m-%d")
+        # ficha_aplicacao.data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
+        ficha_aplicacao.data_aplicada = datetime.strptime(dados["data1"], "%Y-%m-%d")
 
-        ficha_aplicacao.data_planejada = pytz.timezone("America/Sao_Paulo").localize(
-            ficha_aplicacao.data_planejada
-        )
+        # ficha_aplicacao.data_planejada = pytz.timezone("America/Sao_Paulo").localize(
+        #    ficha_aplicacao.data_planejada
+        # )
         ficha_aplicacao.data_aplicada = pytz.timezone("America/Sao_Paulo").localize(
             ficha_aplicacao.data_aplicada
         )
@@ -215,6 +235,29 @@ def atualizar_dados(request):
         return JsonResponse({"status": "success"}, safe=False)
     else:
         return JsonResponse({"status": "fail"}, safe=False)
+
+
+def ImprimirFicha(request, pk):
+    ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=pk)
+    estufas = Estufa.objects.all()
+    atividades = Atividade.objects.all()
+    produtos = Produtos.objects.all()
+    tipos_irrigador = TipoIrrigador.objects.all()
+    ran = [i for i in range(1, 11)]
+
+    if len(ficha_aplicacao.dados) < 10:
+        ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
+
+    context = {
+        "ficha": ficha_aplicacao,
+        "estufas": estufas,
+        "atividades": atividades,
+        "produtos": produtos,
+        "tipos_irrigador": tipos_irrigador,
+        "range": ran,
+    }
+
+    return render(request, "todos/fichadeaplicacao_detail.html", context)
 
 
 class FichaListView(ListView):

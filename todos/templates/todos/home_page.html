@@ -43,13 +43,51 @@
       .data-operacao {
           margin-bottom: 5px;  /* Adicione um espaçamento entre os parágrafos */
       }
-      p {
-          margin: 0;  /* Remova a margem padrão dos parágrafos para evitar espaços indesejados */
+      
+      .info{
+        margin-top: 10px;
+        max-width: 1800px;
+        display: flex;
+      }
+      
+      .info p {
+        border: 1px solid black;
+        max-width: 400px;
+        margin: 0;
+        padding: 8px;
       }
 
-      .campo-selecao {
-        margin-top: 5px;
+      .info a {
+        border: 1px solid black;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px;
       }
+
+      .info2{
+        margin-top: 10px;
+        max-width: 1800px;
+        display: flex;
+      }
+
+      .info2 a {
+        border: 1px solid black;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px;
+      }
+
+      .info2 a:first-child {
+        border-right: none;
+      }
+
+      .info2 a:last-child {
+        border-left: none;
+      }
+      .info a:last-child {
+        border-left: none;
+      }
+
       table {
             width: 100%;
             border-collapse: collapse;
@@ -78,7 +116,7 @@
         <!-- Número da relação e data da operação -->
         <div class="info-container">
           <div class="numero-recomendacao">
-              <h2>N ̊ da Recomendação: {{ fcc }}</h2>
+              <h2>N ̊ da Recomendação: E{{ fcc }}</h2>
           </div>
           <div class="data-operacao">
               <h2>Data da Operação: {% now 'd/m/Y H:i' %}</h2>
@@ -87,19 +125,19 @@
     </div>
     <form method="POST">
       {% csrf_token %}
-      <div>
-        <a>Atividade: <select class="campo-selecao", id="id_atividade" required>
-            <option value="">Selecione uma opção</option>
-            {% for atividade in atividades %}
-              {% if atividade.ativo == 1 %}
-                <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
-              {% endif %}
-            {% endfor %}
-          </select>
-          <a>Data de Planejamento<input type="date" id="data1" required></a>
-        </a>
+      <div class="info">
+          <a>Atividade: <select class="campo-selecao", id="id_atividade" required>
+              <option value="">Selecione uma opção</option>
+              {% for atividade in atividades %}
+                {% if atividade.ativo == 1 %}
+                  <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+                {% endif %}
+              {% endfor %}
+            </select>
+          </a>
+            <a style=" margin-right: 10px;">Data da Aplicação: <input type="date" id="data"></a>
       </div>
-      <div>
+      <div class="info2">
         <a> Estufa: <select class="campo-selecao", id="id_estufa" required>
             <option value="">Selecione uma opção</option>
             {% for estufa in estufas %}
@@ -109,12 +147,12 @@
             {% endfor %}
           </select>
           <a>Área: <span id="id_area" name="area">0,000</span>
-          <a>fazenda: <span id="id_fazenda" name="fazenda">Selecione uma estufa.</span>
+          <a>Fazenda: <span id="id_fazenda" name="fazenda">Selecione uma estufa.</span>
           </a>
         </a>
       </div>
-      <div>
-        <p> Irrigador: <select class="campo-selecao", id="id_tipo_irrigador" required>
+      <div class="info">
+        <p> Irrigação: <select class="campo-selecao", id="id_tipo_irrigador" required>
             <option value="">Selecione uma opção</option>
             {% for tipo_irrigador in tipos_irrigador %}
               {% if tipo_irrigador.ativo == 1 %}
@@ -122,7 +160,6 @@
               {% endif %}
             {% endfor %}
           </select>
-          <a>Data da Aplicação<input type="date" id="data2"></a>
         </p>
       </div>
       <table>
@@ -153,16 +190,23 @@
                   </select>
                 </td>
                 <td><input type="number" id="dose_{{ i }}" required></td>
-                <td><input type="number" id="campo1_{{ i }}" name="campo1_{{ i }}" readonly></td>
-                <td><input type="number" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
-                <td><input type="number" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
-                <td><input type="number" id="previsto_{{ i }}" name="previsto_{{ i }}" readonly></td>
-                <td><input type="number" id="total_{{ i }}" required></td>
+                <td><input type="number" step="any" id="campo1_{{ i }}" name="campo1_{{ i }}" readonly></td>
+                <td><input type="number" step="any" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
+                <td><input type="number" step="any" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
+                <td><input type="number" step="any" id="previsto_{{ i }}" name="previsto_{{ i }}" readonly></td>
+                <td><input type="number" step="any" id="total_{{ i }}" required></td>
               </tr>
             {% endfor %}
         </tbody>
       </table>
-      <button id="enviarDados" type="submit" class="btn btn-primary btn-sm">Salvar</button>
+
+      <div style="border: 1px solid black; margin-top:10px;">
+        <p style="padding-top:15px;">
+          OBS: <input type="text" style="width: 95%;">
+        </p>
+      </div>
+
+      <button id="enviarDados" type="submit" class="btn btn-primary btn-lg mt-3">Salvar</button>
     </form>
 
     <!-- Conteúdo da página continua aqui -->
@@ -217,7 +261,6 @@
         var area = parseFloat(areaSpan.innerText.replace(',', '.')) || 0;
         var tipoIrrigador = tipoIrrigadorInput.value;
 
-        console.log(area)
 
         if (tipoIrrigador === '1') {
           camposDinamicos.forEach(function (campo) {
@@ -227,27 +270,30 @@
 
             var dose = document.getElementById('dose_' + indice).value;
 
-            var valorCampo1 = area * indice; //exemplo de cálculo
-            var valorCampo2 = area * dose;
+            var valorCampo1 = (area * dose)/2; //exemplo de cálculo
+            var valorCampo2 = (area * dose)/2;
+            var previsto = area * dose;
 
             // Atualize os campos de entrada com os valores calculados
             campo.value = valorCampo1;
             document.getElementById('campo2_' + indice).value = valorCampo2;
             document.getElementById('anti_camara_' + indice).value = "-";
+            document.getElementById('previsto_' + indice).value = previsto;
 
             }
           });
         } else {
-          console.log(tipoIrrigador)
           camposDinamicos.forEach(function (campo) {
             // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
 
-            var valorAntiCamara = area * 0.8 * indice;  // Exemplo de cálculo para anti_camara
+            var dose = document.getElementById('dose_' + indice).value;
+            var valorAntiCamara = area * dose;  // Exemplo de cálculo para anti_camara
 
             // Atualize o campo anti_camara com o valor calculado
             document.getElementById('anti_camara_' + indice).value = valorAntiCamara;
+            document.getElementById('previsto_' + indice).value = valorAntiCamara;
             campo.value = '-';
             document.getElementById('campo2_' + indice).value = '-';
 
@@ -300,8 +346,7 @@
           var estufa_id = $('#id_estufa option:selected').val();
           var area = parseFloat(areaSpan.innerText.replace(',', '.'));
           var irrigador_id = $('#id_tipo_irrigador option:selected').val();
-          var data1 = $('#data1').val();
-          var data2 = $('#data2').val();
+          var data1 = $('#data').val();
 
           // Crie um objeto de dados com as quatro variáveis e a tabela
           var dados = {
@@ -311,7 +356,6 @@
             irrigador_id: irrigador_id,
             dados_tabela: dados_tabela,
             data1: data1,
-            data2: data2,
           };
 
           // Envie os dados via AJAX

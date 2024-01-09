@@ -4,14 +4,13 @@
 
 {% block content %}
     {% if estufa_list %}
-    <table class="table">
+    <table class="table fs-5">
       <thead>
         <tr>
           <th scope="col">#</th>
           <th scope="col">Nome Estufa</th>
           <th scope="col">Área</th>
           <th scope="col">Fazenda</th>
-          <th scope="col">Ativo</th>
           <th scope="col">Ações</th>
         </tr>
       </thead>
@@ -23,15 +22,13 @@
           <td>{{ estufa.area }}</td>
           <td>{{ estufa.Fazenda }}</td>
           <td>
-            <input type="checkbox" {% if estufa.ativo %}checked{% endif %} onclick="location.href='{% url 'estufa_toggle_active' pk=estufa.pk %}'">
-          </td>
-          <td>
             <a href="{% url 'estufa_update' pk=estufa.pk %}"
-               class="btn btn-secondary btn-sm {% if estufa.data_aplicada %}disabled{% endif %}"
+               class="btn btn-secondary btn {% if estufa.data_aplicada %}disabled{% endif %}"
             >
               Editar
             </a>
-            <a href="{% url 'estufa_delete' pk=estufa.pk %}" class="btn btn-danger btn-sm">Excluír</a>
+            <a href="{% url 'estufa_toggle_active' pk=estufa.pk %}" {% if  estufa.ativo %}class="btn btn-danger btn"{% else %}class="btn btn-success btn"{% endif %} 
+            >{% if estufa.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>
           </td>
         </tr>
         {% endfor %}
@@ -40,6 +37,6 @@
     {% else %}
     <p>Não há tarefas cadastradas</p>
     {% endif %}
-    <a href="{% url "estufa_create"%}" class="btn btn-primary btn-sm"> Cadastrar Estufa</a>
+    <a href="{% url "estufa_create"%}" class="btn btn-primary btn-lg"> Cadastrar Estufa</a>
     {% endblock content %}
     

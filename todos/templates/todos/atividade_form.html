@@ -7,9 +7,9 @@ Atividades {% endblock page_title %} {% block content %} {% if atividade.pk %}
 
 <form method="POST" class="uniForm">
   {% csrf_token%} {{form|crispy}}
-  <button type="submit" class="btn btn-primary btn-sm">Salvar</button>
+  <button type="submit" class="btn btn-primary btn-lg">Salvar</button>
 </form>
 
-<a href="{% url "atividade_list"%}" class="btn btn-secondary btn-sm"> Voltar</a>
+<a href="{% url "atividade_list"%}" class="btn btn-secondary btn-lg"> Voltar</a>
 
 {% endblock content %}

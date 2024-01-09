@@ -45,9 +45,9 @@ class FichaDeAplicacao(models.Model):
     data_criada = models.DateTimeField(
         verbose_name="Data de criação", blank=False, auto_now=False
     )
-    data_planejada = models.DateField(
+    data_atualizado = models.DateField(
         verbose_name="Data da aplicação",
-        blank=False,
+        null=True,
         auto_now=False,
         auto_now_add=False,
     )
@@ -59,4 +59,5 @@ class FichaDeAplicacao(models.Model):
     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
     irrigador = models.ForeignKey(TipoIrrigador, on_delete=models.CASCADE)
     dados = models.JSONField()
+    pendente = models.BooleanField(default=False)
     ativo = models.BooleanField(default=True)

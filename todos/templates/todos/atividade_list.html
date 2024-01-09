@@ -4,7 +4,7 @@
 
 {% block content %}
     {% if atividade_list %}
-    <table class="table">
+    <table class="table fs-5">
       <thead>
         <tr>
           <th scope="col">#</th>
@@ -19,11 +19,10 @@
           <td>{{ atividade.nome }}</td>
           <td>
             <a href="{% url 'atividade_update' pk=atividade.pk %}"
-               class="btn btn-secondary btn-sm {% if atividade.data_aplicada %}disabled{% endif %}"
+               class="btn btn-secondary btn {% if atividade.data_aplicada %}disabled{% endif %}"
             >
               Editar
             </a>
-            <a href="{% url 'atividade_delete' pk=atividade.pk %}" class="btn btn-danger btn-sm">Excluír</a>
           </td>
         </tr>
         {% endfor %}
@@ -32,6 +31,6 @@
     {% else %}
     <p>Não há Atividades cadastradas</p>
     {% endif %}
-    <a href="{% url "atividade_create"%}" class="btn btn-primary btn-sm"> Cadastrar Atividade</a>
+    <a href="{% url "atividade_create"%}" class="btn btn-primary btn-lg"> Cadastrar Atividade</a>
     {% endblock content %}
     

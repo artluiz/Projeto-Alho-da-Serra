@@ -1,0 +1,244 @@
+{% load static %}
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block page_title %}{% endblock page_title %}</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+      crossorigin="anonymous"
+    />
+  </head>
+</html>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-size: 1.25em;
+  }
+
+  .cabecalho {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .logo {
+    max-width: 200px;
+    margin-right: 10px;
+  }
+
+  .info-container {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .numero-recomendacao,
+  .data-operacao {
+    margin-bottom: 5px;
+  }
+
+  a {
+    /*font-size: 24px;*/
+  }
+
+  .info{
+    margin-top: 5px;
+    max-width: 800px;
+    display: flex;
+  }
+
+  .info p {
+    border: 1px solid black;
+    min-width: 200px;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .info2{
+    margin-top: 5px;
+    max-width: 600px;
+    display: flex;
+  }
+
+  .info2 p {
+    border: 1px solid black;
+    min-width: 200px;
+    margin: 0;
+    padding: 8px;
+  }
+
+  .info2 p:first-child {
+    border-right: none;
+  }
+
+  .info2 p:last-child {
+    border-left: none;
+  }
+
+  .campo-selecao {
+    margin-top: 5px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  th,
+  td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+  }
+
+  th {/*onload="window.print()"*/
+    background-color: #f2f2f2;
+  }
+</style>
+<body class="container-fluid">
+  <div class="cabecalho">
+    <!-- Logo da empresa -->
+    <div class="logo-container">
+      <img
+        src="{% static '/todos/images/logo.jpeg' %}"
+        alt="Logo da Empresa"
+        class="logo"
+      />
+      <h1 style="font-size: 50px">Controle de aplicações</h1>
+    </div>
+
+    <!-- Número da relação e data da operação -->
+    <div class="info-container">
+      <div
+        class="numero-recomendacao"
+        id="meuElemento"
+        data-ficha-pk="{{ ficha.pk }}"
+      >
+        <h2>N ̊ da Recomendação: E{{ ficha.pk }}</h2>
+      </div>
+      <div class="data-operacao">
+        <h2>Data da Operação: {% now 'd/m/Y H:i' %}</h2>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="info">
+      <div style=" margin-right: 10px;">
+        <p>
+          Atividade:
+          <span class="campo-selecao" id="id_atividade">
+            {{ ficha.atividade.nome }}
+          </span>
+        </p>
+      </div>
+
+      <div >
+        <p>
+          Data da Aplicação
+          <span>{{ ficha.data_aplicada|date:'Y-m-d' }}</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="info2">
+      <p>
+        Estufa:
+        <span class="campo-selecao" id="id_estufa">
+          {{ ficha.estufa.nome_estufa }}
+        </span>
+      </p>
+
+      <p>
+        Área:
+        <span id="id_area" name="area">{{ ficha.area }}</span>
+      </p>
+
+      <p>
+        Fazenda:
+        <span id="id_fazenda" name="fazenda">{{ ficha.estufa.Fazenda }}</span>
+      </p>
+    </div>
+
+    <div class="info">
+      <p style:"border-bottom: 1px solid black;">
+        Irrigador:
+        <span class="campo-selecao" id="id_tipo_irrigador">
+          {{ ficha.irrigador.nome_tipo }}
+        </span>
+      </p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Produto</th>
+        <th>Dose por HÁ</th>
+        <th>Setor A</th>
+        <th>Setor B</th>
+        <th>Anti Câmara</th>
+        <th>Consumo Previsto</th>
+        <th>Consumo Total</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for ficha in ficha.dados %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>
+          <span class="campo-selecao"> {{ ficha.produto|default:'' }} </span>
+        </td>
+        <td>
+          <span>{{ ficha.dose|default:'' }}</span>
+        </td>
+        <td>
+          <span>{{ ficha.campo1|default:'' }}</span>
+        </td>
+        <td>
+          <span>{{ ficha.campo2|default:'' }}</span>
+        </td>
+        <td>
+          <span>{{ ficha.antiCamara|default:'' }}</span>
+        </td>
+        <td>
+          <span>{{ ficha.previsto|default:'' }}</span>
+        </td>
+        <td>
+          <span>{{ ficha.total|default:'' }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <div style="border: 1px solid black; margin-top:10px;">
+    <p style="padding-top:15px;">
+      OBS: {{ ficha.estufa.Fazenda|default:'' }}
+    </p>
+  </div>
+
+  <!-- Conteúdo da página continua aqui -->
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+  <script defer>
+    document.addEventListener("DOMContentLoaded", function () {
+      // Seu código JavaScript/jQuery aqui...
+    });
+  </script>
+</body>
