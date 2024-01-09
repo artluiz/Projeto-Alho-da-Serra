@@ -59,5 +59,6 @@ class FichaDeAplicacao(models.Model):
     atividade = models.ForeignKey(Atividade, on_delete=models.CASCADE)
     irrigador = models.ForeignKey(TipoIrrigador, on_delete=models.CASCADE)
     dados = models.JSONField()
+    obs = models.TextField(null=True, blank=True)
     pendente = models.BooleanField(default=False)
     ativo = models.BooleanField(default=True)

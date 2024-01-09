@@ -108,15 +108,15 @@
   <body>
     <div class="cabecalho">
         <!-- Logo da empresa -->
-        <div class="logo-container">
+        <div class="logo-container" >
           <img src="{% static '/todos/images/logo.jpeg' %}" alt="Logo da Empresa" class="logo">
-            <h1>Controle de aplicações</h1>
+            <h1 style="font-size: 50px;">Controle de aplicações</h1>
         </div>
 
         <!-- Número da relação e data da operação -->
         <div class="info-container">
-          <div class="numero-recomendacao">
-              <h2>N ̊ da Recomendação: E{{ fcc }}</h2>
+          <div class="numero-recomendacao" id="meuElemento" data-ficha-pk="{{ ficha.pk }}">
+              <h2>N ̊ da Recomendação: E{{ pk_view }}<h2/>
           </div>
           <div class="data-operacao">
               <h2>Data da Operação: {% now 'd/m/Y H:i' %}</h2>
@@ -126,38 +126,46 @@
     <form method="POST">
       {% csrf_token %}
       <div class="info">
-          <a>Atividade: <select class="campo-selecao", id="id_atividade" required>
-              <option value="">Selecione uma opção</option>
-              {% for atividade in atividades %}
-                {% if atividade.ativo == 1 %}
-                  <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
-                {% endif %}
-              {% endfor %}
-            </select>
-          </a>
-            <a style=" margin-right: 10px;">Data da Aplicação: <input type="date" id="data"></a>
-      </div>
-      <div class="info2">
-        <a> Estufa: <select class="campo-selecao", id="id_estufa" required>
-            <option value="">Selecione uma opção</option>
-            {% for estufa in estufas %}
-              {% if estufa.ativo == 1 %}
-                <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.Fazenda }}">{{ estufa.nome_estufa }}</option>
+        <a>Atividade: 
+          <select class="campo-selecao", id="id_atividade">
+            <option value={{ ficha.atividade.pk }}>{{ficha.atividade.nome}}</option>
+            {% for atividade in atividades %}
+              {% if atividade.pk != ficha.atividade.pk %}
+                    {% if atividade.ativo == 1 %}
+                      <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+                    {% endif %}
               {% endif %}
             {% endfor %}
           </select>
-          <a>Área: <span id="id_area" name="area">0,000</span>
-          <a>Fazenda: <span id="id_fazenda" name="fazenda">Selecione uma estufa.</span>
+          <a>Data da Aplicação<input type="date" id="data" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></a>
+        </a>
+      </div>
+      <div class="info2">
+        <a> Estufa: <select class="campo-selecao", id="id_estufa">
+            <option value={{ ficha.estufa.pk }}>{{ ficha.estufa.nome_estufa}}</option>
+            {% for estufa in estufas %}
+              {% if estufa.pk != ficha.estufa.pk %}
+                {% if estufa.ativo == 1 %}
+                  <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.Fazenda }}">{{ estufa.nome_estufa }}</option>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </select>
+          <a>Área: <span id="id_area" name="area">{{ ficha.area }}</span>
+          <a>Fazenda: <span id="id_fazenda" name="fazenda">{{ ficha.estufa.Fazenda}}</span>
           </a>
         </a>
       </div>
       <div class="info">
-        <p> Irrigação: <select class="campo-selecao", id="id_tipo_irrigador" required>
-            <option value="">Selecione uma opção</option>
+        <p> Irrigador: 
+          <select class="campo-selecao", id="id_tipo_irrigador">
+            <option value={{ ficha.irrigador.pk }}>{{ ficha.irrigador.nome_tipo}}</option>
             {% for tipo_irrigador in tipos_irrigador %}
-              {% if tipo_irrigador.ativo == 1 %}
-                <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
-              {% endif %}
+              {% if tipo_irrigador.pk != ficha.irrigador.pk%}
+                    {% if tipo_irrigador.ativo == 1 %}
+                      <option value={{ tipo_irrigador.pk }}>{{ tipo_irrigador.nome_tipo }}</option>
+                    {% endif %}
+              {% endif %} 
             {% endfor %}
           </select>
         </p>
@@ -176,27 +184,27 @@
             </tr>
         </thead>
         <tbody>
-            {% for i in range %}
-              <tr>
-                <td>{{ i }}</td>
-                <td>
-                  <select class="campo-selecao" required>
-                    <option value=""></option>
-                    {% for produto in produtos %}
-                      {% if produto.ativo == 1 %}
-                        <option value={{ produto.produto }}>{{ produto.produto }}</option>
-                      {% endif %}
-                    {% endfor %}
-                  </select>
-                </td>
-                <td><input type="number" id="dose_{{ i }}" required></td>
-                <td><input type="number" step="any" id="campo1_{{ i }}" name="campo1_{{ i }}" readonly></td>
-                <td><input type="number" step="any" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
-                <td><input type="number" step="any" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
-                <td><input type="number" step="any" id="previsto_{{ i }}" name="previsto_{{ i }}" readonly></td>
-                <td><input type="number" step="any" id="total_{{ i }}" required></td>
-              </tr>
-            {% endfor %}
+          {% for ficha in ficha.dados %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>
+                <select class="campo-selecao">
+                  <option value="{{ ficha.produto|default:'' }}">{{ ficha.produto|default:'' }}</option>
+                  {% for produto in produtos %}
+                    {% if produto.ativo == 1 %}
+                      <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                    {% endif %}
+                  {% endfor %}
+                </select>
+              </td>
+              <td><input type="number" id="dose_{{ forloop.counter }}" value = {{ ficha.dose|default:'' }}></td>
+              <td><input type="number" id="campo1_{{ forloop.counter }}" name="campo1_{{ forloop.counter }}" value = {{ ficha.campo1|default:'' }} readonly></td>
+              <td><input type="number" id="campo2_{{ forloop.counter }}" name="campo2_{{ forloop.counter }}" value = {{ ficha.campo2|default:'' }} readonly></td>
+              <td><input type="number" id="anti_camara_{{ forloop.counter }}" name="anti_camara_{{ forloop.counter }}" value = {{ ficha.antiCamara|default:'' }} readonly></td>
+              <td><input type="number" id="previsto_{{ forloop.counter }}" name="previsto_{{ forloop.counter }}" value = {{ ficha.previsto|default:'' }} readonly></td>
+              <td><input type="number" id="total_{{ forloop.counter }}" value = {{ ficha.total|default:'' }}></td>
+            </tr>
+          {% endfor %}
         </tbody>
       </table>
 
@@ -212,15 +220,13 @@
         <button class="enviarDados btn btn-success btn-lg mt-3" data-funcao="funcao3">Salvar, Imprimir e Repetir</button>
 
     </form>
-
+    <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-lg"> Voltar</a>
     <!-- Conteúdo da página continua aqui -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script defer>
-    
     document.addEventListener('DOMContentLoaded', function () {
       var areaSpan = document.getElementById('id_area');
       var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
-
       var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
 
       document.getElementById('id_estufa').addEventListener('change', function () {
@@ -265,7 +271,6 @@
         var area = parseFloat(areaSpan.innerText.replace(',', '.')) || 0;
         var tipoIrrigador = tipoIrrigadorInput.value;
 
-
         if (tipoIrrigador === '1') {
           camposDinamicos.forEach(function (campo) {
             // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
@@ -309,91 +314,91 @@
     });
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script defer>
-  document.querySelectorAll('.enviarDados').forEach(function(button) {
-    button.addEventListener('click', function () {
-      var areaSpan = document.getElementById('id_area');
-      var funcao = button.getAttribute('data-funcao');
-      
-      // Crie um array para armazenar os dados das linhas preenchidas da tabela
-      var dados_tabela = [];
+    <script defer>
+      document.querySelectorAll('.enviarDados').forEach(function(button) {
+        button.addEventListener('click', function () {
+          var areaSpan = document.getElementById('id_area');
+          var funcao = button.getAttribute('data-funcao');
+          
+          // Crie um array para armazenar os dados das linhas preenchidas da tabela
+          var dados_tabela = [];
 
-      // Itere sobre as linhas da tabela
-      $('table tbody tr').each(function () {
-        var linha = $(this);
+          // Itere sobre as linhas da tabela
+          $('table tbody tr').each(function () {
+            var linha = $(this);
 
-        // Colete os valores dos campos na linha atual
-        var produto = linha.find('select').val();
-        var dose = linha.find('input[id^="dose_"]').val();
-        var campo1 = linha.find('input[id^="campo1_"]').val();
-        var campo2 = linha.find('input[id^="campo2_"]').val();
-        var antiCamara = linha.find('input[id^="anti_camara_"]').val();
-        var previsto = linha.find('input[id^="previsto_"]').val();
-        var total = linha.find('input[id^="total_"]').val();
+            // Colete os valores dos campos na linha atual
+            var produto = linha.find('select').val();
+            var dose = linha.find('input[id^="dose_"]').val();
+            var campo1 = linha.find('input[id^="campo1_"]').val();
+            var campo2 = linha.find('input[id^="campo2_"]').val();
+            var antiCamara = linha.find('input[id^="anti_camara_"]').val();
+            var previsto = linha.find('input[id^="previsto_"]').val();
+            var total = linha.find('input[id^="total_"]').val();
 
-        // Adicione os dados da linha ao array
-        if (produto || dose || total) {
-          // Adicione os dados da linha ao array
-          console.log(produto);
-          dados_tabela.push({
-            produto: produto,
-            dose: dose,
-            campo1: campo1,
-            campo2: campo2,
-            antiCamara: antiCamara,
-            previsto: previsto,
-            total: total
+            // Adicione os dados da linha ao array
+            if (produto || dose || total) {
+              // Adicione os dados da linha ao array
+              console.log(produto);
+              dados_tabela.push({
+                produto: produto,
+                dose: dose,
+                campo1: campo1,
+                campo2: campo2,
+                antiCamara: antiCamara,
+                previsto: previsto,
+                total: total
+              });
+            }
           });
-        }
+
+          // Colete os valores das quatro variáveis
+          var atividade_id = $('#id_atividade option:selected').val();
+          var estufa_id = $('#id_estufa option:selected').val();
+          var area = parseFloat(areaSpan.innerText.replace(',', '.'));
+          var irrigador_id = $('#id_tipo_irrigador option:selected').val();
+          var data1 = $('#data').val();
+          var obs = $('#id_obs').val();
+          var ficha_pk = $('#meuElemento').data('ficha-pk');
+
+          // Crie um objeto de dados com as quatro variáveis e a tabela
+          var dados = {
+            atividade_id: atividade_id,
+            estufa_id: estufa_id,
+            area: area,
+            irrigador_id: irrigador_id,
+            dados_tabela: dados_tabela,
+            data1: data1,
+            obs: obs,
+          };
+
+          // Envie os dados via AJAX
+          $.ajax({
+            url: "{% url 'receber_dados' %}",
+            type: 'post',
+            data: JSON.stringify(dados),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function(data){
+              if (funcao === "funcao1") {
+                window.open("{% url 'imprimir_ficha' pk=pk_view %}", "_blank");
+                window.location.reload();
+              } else if (funcao === "funcao2") {
+                // Incrementa o número de recomendação
+                window.open("{% url 'ficha_repetir' pk=pk_view %}", "_self");
+              } else if (funcao === "funcao3") {
+                window.open("{% url 'imprimir_ficha' pk=pk_view %}", "_blank");
+                window.open("{% url 'ficha_repetir' pk=pk_view %}", "_self");
+              }
+            },
+            error: function (error) {
+              console.error(error);
+              // Adicione lógica para lidar com erros, se necessário
+            }
+          });
+        });
       });
-
-      // Colete os valores das quatro variáveis
-      var atividade_id = $('#id_atividade option:selected').val();
-      var estufa_id = $('#id_estufa option:selected').val();
-      var area = parseFloat(areaSpan.innerText.replace(',', '.'));
-      var irrigador_id = $('#id_tipo_irrigador option:selected').val();
-      var data1 = $('#data').val();
-      var obs = $('#id_obs').val();
-
-      // Crie um objeto de dados com as quatro variáveis e a tabela
-      var dados = {
-        atividade_id: atividade_id,
-        estufa_id: estufa_id,
-        area: area,
-        irrigador_id: irrigador_id,
-        dados_tabela: dados_tabela,
-        data1: data1,
-        obs: obs,
-      };
-
-      // Envie os dados via AJAX
-      $.ajax({
-        url: "{% url 'receber_dados' %}",
-        type: 'post',
-        data: JSON.stringify(dados),
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function(data){
-          if (funcao === "funcao1") {
-            window.open("{% url 'imprimir_ficha' pk=fcc %}", "_blank");
-            window.location.reload();
-          } else if (funcao === "funcao2") {
-            // Incrementa o número de recomendação
-            window.open("{% url 'ficha_repetir' pk=fcc %}", "_self");
-          } else if (funcao === "funcao3") {
-            window.open("{% url 'ficha_repetir' pk=fcc %}", "_self");
-            window.open("{% url 'imprimir_ficha' pk=fcc %}", "_blank");
-          }
-        },
-        error: function (error) {
-          console.error(error);
-          // Adicione lógica para lidar com erros, se necessário
-        }
-      });
-    });
-  });
-</script>
-
+    </script>
   </body>
 
 {% endblock content %}

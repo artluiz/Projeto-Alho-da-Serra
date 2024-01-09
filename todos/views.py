@@ -111,6 +111,32 @@ def todo_home(request):
     return render(request, "todos/home_page.html", context)
 
 
+def todo_repetir(request, pk):
+    ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=pk)
+    estufas = Estufa.objects.all()
+    atividades = Atividade.objects.all()
+    produtos = Produtos.objects.all()
+    tipos_irrigador = TipoIrrigador.objects.all()
+    ran = [i for i in range(1, 11)]
+    pk_view = ficha_aplicacao.pk + 1
+    print(ficha_aplicacao)
+
+    if len(ficha_aplicacao.dados) < 10:
+        ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
+
+    context = {
+        "ficha": ficha_aplicacao,
+        "estufas": estufas,
+        "atividades": atividades,
+        "produtos": produtos,
+        "tipos_irrigador": tipos_irrigador,
+        "range": ran,
+        "pk_view": pk_view,
+    }
+
+    return render(request, "todos/home_repetir.html", context)
+
+
 def todo_update(request, pk):
     ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=pk)
     estufas = Estufa.objects.all()
@@ -174,6 +200,7 @@ def receber_dados(request):
         area = dados["area"]
         irrigador_id = TipoIrrigador.objects.get(pk=(dados["irrigador_id"]))
         dados_tabela = dados["dados_tabela"]
+        obs = dados["obs"]
         data_criada = timezone.now().astimezone(pytz.timezone("America/Sao_Paulo"))
 
         # data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
@@ -192,6 +219,7 @@ def receber_dados(request):
             dados=dados_tabela,
             # data_planejada=data_planejada,
             data_aplicada=data_aplicada,
+            obs=obs,
         )
         ficha_aplicacao.save()
 
@@ -258,6 +286,29 @@ def ImprimirFicha(request, pk):
     }
 
     return render(request, "todos/fichadeaplicacao_detail.html", context)
+
+
+def FichaView(request, pk):
+    ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=pk)
+    estufas = Estufa.objects.all()
+    atividades = Atividade.objects.all()
+    produtos = Produtos.objects.all()
+    tipos_irrigador = TipoIrrigador.objects.all()
+    ran = [i for i in range(1, 11)]
+
+    if len(ficha_aplicacao.dados) < 10:
+        ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
+
+    context = {
+        "ficha": ficha_aplicacao,
+        "estufas": estufas,
+        "atividades": atividades,
+        "produtos": produtos,
+        "tipos_irrigador": tipos_irrigador,
+        "range": ran,
+    }
+
+    return render(request, "todos/ficha_view.html", context)
 
 
 class FichaListView(ListView):

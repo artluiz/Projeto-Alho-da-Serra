@@ -2,8 +2,9 @@ from django.contrib import admin
 from django.urls import path
 from todos.views import (
     todo_home,
+    todo_repetir,
     todo_update,
-    todo_edit,
+    FichaView,
     receber_dados,
     atualizar_dados,
     ficha_toggle_pendente,
@@ -35,9 +36,10 @@ urlpatterns = [
     path(
         "ficha/toggle_p/<int:pk>", ficha_toggle_pendente, name="ficha_toggle_pendente"
     ),
+    path("ficha/view/<int:pk>/", FichaView, name="ficha_view"),
     path("ficha/imprimir/<int:pk>/", ImprimirFicha, name="imprimir_ficha"),
     path("update/<int:pk>", todo_update, name="ficha_update"),
-    path("edit/<int:pk>", todo_edit, name="ficha_edit"),
+    path("repetir/<int:pk>", todo_repetir, name="ficha_repetir"),
     path("receber_dados/", receber_dados, name="receber_dados"),
     path("atualizar_dados/", atualizar_dados, name="atualizar_dados"),
     path("ficha", FichaListView.as_view(), name="ficha_list"),

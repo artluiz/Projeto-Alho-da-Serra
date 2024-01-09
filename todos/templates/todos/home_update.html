@@ -1,7 +1,10 @@
 {% extends "base.html" %} {% load static %}
 {% block content %} {% load tz %} 
     <style>
+      /* Exemplo de estilo básico, personalize conforme necessário */
       body {
+        margin-right: 30px;
+        margin-left: 30px;
         font-family: Arial, sans-serif;
         margin: 0;
         padding: 0;
@@ -9,44 +12,82 @@
       }
 
       .cabecalho {
+        margin-right: 30px;
+        margin-left: 30px;
         display: flex;
         justify-content: space-between;
         align-items: center;
       }
 
       .logo-container {
+          margin-left: 30px;
           display: flex;
           align-items: center;
+          font-size: 1.5em;
       }
 
       .logo {
-          max-width: 200px;  
-          margin-right: 10px;  
+          max-width: 200px;  /* Ajuste conforme necessário */
+          margin-right: 10px;  /* Espaço entre o logo e o texto "Controle de aplicações" */
       }
       
       .info-container {
+          margin-left: 30px;
           margin-top: 20px;
           display: flex;
-          flex-direction: column;  
+          flex-direction: column;  /* Empilhe os elementos verticalmente */
           align-items: center;
       }
 
       .numero-recomendacao,
       .data-operacao {
-          margin-bottom: 5px;  
+          margin-bottom: 5px;  /* Adicione um espaçamento entre os parágrafos */
       }
-      a {
-        /*font-size: 24px;*/
+      
+      .info{
+        margin-top: 10px;
+        max-width: 1800px;
+        display: flex;
+      }
+      
+      .info p {
+        border: 1px solid black;
+        max-width: 400px;
+        margin: 0;
+        padding: 8px;
       }
 
-      p {
-          /*font-size: 24px;*/
-          margin: 0;  
+      .info a {
+        border: 1px solid black;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px;
       }
 
-      .campo-selecao {
-        margin-top: 5px;
+      .info2{
+        margin-top: 10px;
+        max-width: 1800px;
+        display: flex;
       }
+
+      .info2 a {
+        border: 1px solid black;
+        min-width: 200px;
+        margin: 0;
+        padding: 8px;
+      }
+
+      .info2 a:first-child {
+        border-right: none;
+      }
+
+      .info2 a:last-child {
+        border-left: none;
+      }
+      .info a:last-child {
+        border-left: none;
+      }
+
       table {
             width: 100%;
             border-collapse: collapse;
@@ -84,7 +125,7 @@
     </div>
     <form method="PUT">
       {% csrf_token %}
-      <div>
+      <div class="info">
         <a>Atividade: 
           <select class="campo-selecao", id="id_atividade">
             <option value={{ ficha.atividade.pk }}>{{ficha.atividade.nome}}</option>
@@ -99,7 +140,7 @@
           <a>Data da Aplicação<input type="date" id="data2" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></a>
         </a>
       </div>
-      <div>
+      <div class="info2">
         <a> Estufa: <select class="campo-selecao", id="id_estufa">
             <option value={{ ficha.estufa.pk }}>{{ ficha.estufa.nome_estufa}}</option>
             {% for estufa in estufas %}
@@ -115,7 +156,7 @@
           </a>
         </a>
       </div>
-      <div>
+      <div class="info">
         <p> Irrigador: 
           <select class="campo-selecao", id="id_tipo_irrigador">
             <option value={{ ficha.irrigador.pk }}>{{ ficha.irrigador.nome_tipo}}</option>
@@ -166,9 +207,16 @@
           {% endfor %}
         </tbody>
       </table>
-      <button id="enviarDados" type="submit" class="btn btn-primary btn-lg">Salvar</button>
+
+      <div style="border: 1px solid black; margin-top:10px;">
+        <p style="padding-top:15px;">
+          OBS: <input type="text" id="obs" style="width: 95%;" value={{ficha.obs}}>
+        </p>
+      </div>
+
+      <button id="enviarDados" type="submit" class="btn btn-primary btn-lg mt-3">Salvar</button>
     </form>
-    <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-lg"> Voltar</a>
+    <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-lg mt-1"> Voltar</a>
     <!-- Conteúdo da página continua aqui -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script defer>
@@ -227,27 +275,30 @@
 
             var dose = document.getElementById('dose_' + indice).value;
 
-            var valorCampo1 = area * indice; //exemplo de cálculo
-            var valorCampo2 = area * dose;
+            var valorCampo1 = (area * dose)/2; //exemplo de cálculo
+            var valorCampo2 = (area * dose)/2;
+            var previsto = area * dose;
 
             // Atualize os campos de entrada com os valores calculados
             campo.value = valorCampo1;
             document.getElementById('campo2_' + indice).value = valorCampo2;
             document.getElementById('anti_camara_' + indice).value = "-";
+            document.getElementById('previsto_' + indice).value = previsto;
 
             }
           });
         } else {
-          console.log(tipoIrrigador)
           camposDinamicos.forEach(function (campo) {
             // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
 
-            var valorAntiCamara = area * 0.8 * indice;  // Exemplo de cálculo para anti_camara
+            var dose = document.getElementById('dose_' + indice).value;
+            var valorAntiCamara = area * dose;  // Exemplo de cálculo para anti_camara
 
             // Atualize o campo anti_camara com o valor calculado
             document.getElementById('anti_camara_' + indice).value = valorAntiCamara;
+            document.getElementById('previsto_' + indice).value = valorAntiCamara;
             campo.value = '-';
             document.getElementById('campo2_' + indice).value = '-';
 
@@ -262,6 +313,7 @@
     <script defer>
       document.addEventListener('DOMContentLoaded', function () {
         var areaSpan = document.getElementById('id_area');
+        var obsInput = document.getElementById('obs');
         $('#enviarDados').on('click', function () {
           // Crie um array para armazenar os dados das linhas preenchidas da tabela
           var dados_tabela = [];
@@ -311,6 +363,7 @@
             dados_tabela: dados_tabela,
             data: data,
             ficha_pk: ficha_pk,
+            obs: obsInput,
           };
 
           // Envie os dados via AJAX
