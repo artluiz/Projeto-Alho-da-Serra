@@ -28,7 +28,7 @@
               Editar
             </a>
             <a href="{% url 'estufa_toggle_active' pk=estufa.pk %}" {% if  estufa.ativo %}class="btn btn-danger btn"{% else %}class="btn btn-success btn"{% endif %} 
-            >{% if estufa.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>
+            >{% if estufa.ativo %} Finalizar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>
           </td>
         </tr>
         {% endfor %}

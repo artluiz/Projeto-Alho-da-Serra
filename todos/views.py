@@ -57,9 +57,9 @@ class FichaFiltro(ListView):
 
         if status_filter is not None:
             if status_filter == "true":
-                queryset = queryset.filter(pendente=True)
-            elif status_filter == "false":
                 queryset = queryset.filter(pendente=False)
+            elif status_filter == "false":
+                queryset = queryset.filter(pendente=True)
 
         return queryset
 
