@@ -68,17 +68,29 @@ def upload_excel_file(request):
     if request.method == "POST":
         excel_file = request.FILES["inputExcel"]
 
-        if (
-            str(excel_file).split(".")[-1] == "xls"
-            or str(excel_file).split(".")[-1] == "xlsx"
-        ):
+        if str(excel_file).split(".")[-1] in ["xls", "xlsx"]:
             data = pd.read_excel(excel_file)
             for _, row in data.iterrows():
-                produto = Produtos()
+                produto_cod = row[
+                    "Cód."
+                ]  # Certifique-se de que a coluna ID exista na planilha
+
+                # Aqui, certifique-se de que todas as colunas necessárias estejam presentes
+                if (
+                    pd.isna(produto_cod)
+                    or pd.isna(row["Produto"])
+                    or pd.isna(row["Cód."])
+                    or pd.isna(row["Descrição"])
+                ):
+                    # Lidar com dados faltantes, por exemplo, pulando a linha ou registrando um erro
+                    continue
+
+                produto, created = Produtos.objects.get_or_create(codigo=produto_cod)
                 produto.produto = row["Produto"]
                 produto.codigo = row["Cód."]
                 produto.descricao = row["Descrição"]
                 produto.save()
+                produto.save(using="secondary")
 
             return HttpResponseRedirect(reverse("produtos_list"))
         else:
@@ -93,6 +105,7 @@ def estufa_toggle_active(request, pk):
     estufa = get_object_or_404(Estufa, pk=pk)
     estufa.ativo = not estufa.ativo
     estufa.save()
+    estufa.save(using="secondary")
     return redirect(reverse("estufa_list"))
 
 
@@ -100,6 +113,7 @@ def ficha_toggle_active(request, pk):
     ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
     ficha.ativo = not ficha.ativo
     ficha.save()
+    ficha.save(using="secondary")
     return redirect(reverse("ficha_list"))
 
 
@@ -107,6 +121,7 @@ def ficha_toggle_pendente(request, pk):
     ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
     ficha.pendente = not ficha.pendente
     ficha.save()
+    ficha.save(using="secondary")
     return redirect(reverse("ficha_list"))
 
 
@@ -114,19 +129,20 @@ def produto_toggle_active(request, pk):
     produto = get_object_or_404(Produtos, pk=pk)
     produto.ativo = not produto.ativo
     produto.save()
+    produto.save(using="secondary")
     return redirect(reverse("produtos_list"))
 
 
 def todo_home(request):
     ficha_aplicacao_count = FichaDeAplicacao.objects.aggregate(Max("id"))["id__max"]
     if ficha_aplicacao_count is None:
-        ficha_aplicacao_count = 1
+        ficha_aplicacao_count = 1178
     else:
         ficha_aplicacao_count += 1
 
     estufas = Estufa.objects.all()
     atividades = Atividade.objects.all()
-    produtos = Produtos.objects.all()
+    produtos = Produtos.objects.all().order_by("descricao")
     tipos_irrigador = TipoIrrigador.objects.all()
     ran = [i for i in range(1, 11)]
 
@@ -146,7 +162,7 @@ def todo_repetir(request, pk):
     ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=pk)
     estufas = Estufa.objects.all()
     atividades = Atividade.objects.all()
-    produtos = Produtos.objects.all()
+    produtos = Produtos.objects.all().order_by("descricao")
     tipos_irrigador = TipoIrrigador.objects.all()
     ran = [i for i in range(1, 11)]
     pk_view = ficha_aplicacao.pk + 1
@@ -172,7 +188,7 @@ def todo_update(request, pk):
     ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=pk)
     estufas = Estufa.objects.all()
     atividades = Atividade.objects.all()
-    produtos = Produtos.objects.all()
+    produtos = Produtos.objects.all().order_by("descricao")
     tipos_irrigador = TipoIrrigador.objects.all()
     ran = [i for i in range(1, 11)]
 
@@ -189,29 +205,6 @@ def todo_update(request, pk):
     }
 
     return render(request, "todos/home_update.html", context)
-
-
-def todo_edit(request, pk):
-    ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=pk)
-    estufas = Estufa.objects.all()
-    atividades = Atividade.objects.all()
-    produtos = Produtos.objects.all()
-    tipos_irrigador = TipoIrrigador.objects.all()
-    ran = [i for i in range(1, 11)]
-
-    if len(ficha_aplicacao.dados) < 10:
-        ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
-
-    context = {
-        "ficha": ficha_aplicacao,
-        "estufas": estufas,
-        "atividades": atividades,
-        "produtos": produtos,
-        "tipos_irrigador": tipos_irrigador,
-        "range": ran,
-    }
-
-    return render(request, "todos/home_edit.html", context)
 
 
 @csrf_exempt
@@ -255,6 +248,8 @@ def receber_dados(request):
         # ficha_aplicacao.objects.using('secondary').all()
         ficha_aplicacao.save()
 
+        ficha_aplicacao.save(using="secondary")
+
         return JsonResponse({"status": "success"}, safe=False)
     else:
         return JsonResponse({"status": "fail"}, safe=False)
@@ -291,6 +286,7 @@ def atualizar_dados(request):
 
         # Salve a instância para atualizar o banco de dados
         ficha_aplicacao.save()
+        ficha_aplicacao.save(using="secondary")
 
         return JsonResponse({"status": "success"}, safe=False)
     else:
@@ -362,14 +358,28 @@ class EstufaListView(ListView):
 
 class EstufaCreateView(CreateView):
     model = Estufa
-    fields = ["nome_estufa", "area", "Fazenda"]
+    fields = ["nome_estufa", "area", "fazenda"]
     success_url = reverse_lazy("estufa_list")
+
+    def form_valid(self, form):
+        # Atualiza no banco de dados primário
+        form.instance.save(using="default")
+        # Atualiza no banco de dados secundário
+        form.instance.save(using="secondary")
+        return super().form_valid(form)
 
 
 class EstufaUpdateView(UpdateView):
     model = Estufa
-    fields = ["nome_estufa", "area", "Fazenda"]
+    fields = ["nome_estufa", "area", "fazenda"]
     success_url = reverse_lazy("estufa_list")
+
+    def form_valid(self, form):
+        # Atualiza no banco de dados primário
+        form.instance.save(using="default")
+        # Atualiza no banco de dados secundário
+        form.instance.save(using="secondary")
+        return super().form_valid(form)
 
 
 class EstufaDeleteView(DeleteView):
@@ -385,11 +395,25 @@ class AtividadeCreateView(CreateView):
     fields = ["nome"]
     success_url = reverse_lazy("atividade_list")
 
+    def form_valid(self, form):
+        # Atualiza no banco de dados primário
+        form.instance.save(using="default")
+        # Atualiza no banco de dados secundário
+        form.instance.save(using="secondary")
+        return super().form_valid(form)
+
 
 class AtividadeUpdateView(UpdateView):
     model = Atividade
     fields = ["nome"]
     success_url = reverse_lazy("atividade_list")
+
+    def form_valid(self, form):
+        # Atualiza no banco de dados primário
+        form.instance.save(using="default")
+        # Atualiza no banco de dados secundário
+        form.instance.save(using="secondary")
+        return super().form_valid(form)
 
 
 class AtividadeDeleteView(DeleteView):
@@ -405,11 +429,25 @@ class ProdutosCreateView(CreateView):
     fields = ["produto", "codigo", "descricao"]
     success_url = reverse_lazy("produtos_list")
 
+    def form_valid(self, form):
+        # Atualiza no banco de dados primário
+        form.instance.save(using="default")
+        # Atualiza no banco de dados secundário
+        form.instance.save(using="secondary")
+        return super().form_valid(form)
+
 
 class ProdutosUpdateView(UpdateView):
     model = Produtos
     fields = ["produto", "codigo", "descricao"]
     success_url = reverse_lazy("produtos_list")
+
+    def form_valid(self, form):
+        # Atualiza no banco de dados primário
+        form.instance.save(using="default")
+        # Atualiza no banco de dados secundário
+        form.instance.save(using="secondary")
+        return super().form_valid(form)
 
 
 class ProdutosDeleteView(DeleteView):

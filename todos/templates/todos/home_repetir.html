@@ -104,6 +104,8 @@
             background-color: #f2f2f2;
         }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
   </head>
   <body>
     <div class="cabecalho">
@@ -146,7 +148,7 @@
             {% for estufa in estufas %}
               {% if estufa.pk != ficha.estufa.pk %}
                 {% if estufa.ativo == 1 %}
-                  <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.Fazenda }}">{{ estufa.nome_estufa }}</option>
+                  <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.fazenda }}">{{ estufa.nome_estufa }}</option>
                 {% endif %}
               {% endif %}
             {% endfor %}
@@ -187,16 +189,16 @@
           {% for ficha in ficha.dados %}
             <tr>
               <td>{{ forloop.counter }}</td>
-              <td>
-                <select class="campo-selecao">
+                <td>
+                  <select id="listaProdutos" class="campo-selecao" required>
                   <option value="{{ ficha.produto|default:'' }}">{{ ficha.produto|default:'' }}</option>
-                  {% for produto in produtos %}
-                    {% if produto.ativo == 1 %}
-                      <option value={{ produto.produto }}>{{ produto.produto }}</option>
-                    {% endif %}
-                  {% endfor %}
-                </select>
-              </td>
+                    {% for produto in produtos %}
+                      {% if produto.ativo == 1 %}
+                        <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </td>
               <td><input type="number" id="dose_{{ forloop.counter }}" value = {{ ficha.dose|default:'' }}></td>
               <td><input type="number" id="campo1_{{ forloop.counter }}" name="campo1_{{ forloop.counter }}" readonly></td>
               <td><input type="number" id="campo2_{{ forloop.counter }}" name="campo2_{{ forloop.counter }}" readonly></td>
@@ -223,6 +225,10 @@
     <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-lg"> Voltar</a>
     <!-- Conteúdo da página continua aqui -->
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    
+    <script>
+      $('#listaProdutos').select2
+    </script>
     <script defer>
     document.addEventListener('DOMContentLoaded', function () {
       var areaSpan = document.getElementById('id_area');

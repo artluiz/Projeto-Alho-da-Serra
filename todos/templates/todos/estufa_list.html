@@ -20,7 +20,7 @@
           <th scope="row">{{ estufa.pk }}</th>
           <td>{{ estufa.nome_estufa }}</td>
           <td>{{ estufa.area }}</td>
-          <td>{{ estufa.Fazenda }}</td>
+          <td>{{ estufa.fazenda }}</td>
           <td>
             <a href="{% url 'estufa_update' pk=estufa.pk %}"
                class="btn btn-secondary btn {% if estufa.data_aplicada %}disabled{% endif %}"

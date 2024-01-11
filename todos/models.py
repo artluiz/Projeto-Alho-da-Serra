@@ -7,8 +7,8 @@ class Estufa(models.Model):
         verbose_name="Estufa", max_length=50, null=False, blank=False
     )
     area = models.DecimalField(verbose_name="Área", decimal_places=4, max_digits=8)
-    Fazenda = models.CharField(
-        verbose_name="Fazenda", max_length=50, null=False, blank=False
+    fazenda = models.CharField(
+        verbose_name="fazenda", max_length=50, null=False, blank=False
     )
     ativo = models.BooleanField(default=True)
 
@@ -25,11 +25,11 @@ class Atividade(models.Model):
 
 class Produtos(models.Model):
     produto = models.CharField(
-        verbose_name="Produto", max_length=30, null=False, blank=False
+        verbose_name="Produto", max_length=50, null=False, blank=False
     )
     codigo = models.IntegerField(verbose_name="Codigo", null=False)
     descricao = models.CharField(
-        verbose_name="Descrição", max_length=100, null=False, blank=False
+        verbose_name="Descrição", max_length=50, null=False, blank=False
     )
     ativo = models.BooleanField(default=True)
 

@@ -104,6 +104,9 @@
             background-color: #f2f2f2;
         }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+</head>
   </head>
   <body>
     <div class="cabecalho">
@@ -142,7 +145,7 @@
             <option value="">Selecione uma opção</option>
             {% for estufa in estufas %}
               {% if estufa.ativo == 1 %}
-                <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.Fazenda }}">{{ estufa.nome_estufa }}</option>
+                <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.fazenda }}">{{ estufa.nome_estufa }}</option>
               {% endif %}
             {% endfor %}
           </select>
@@ -180,7 +183,7 @@
               <tr>
                 <td>{{ i }}</td>
                 <td>
-                  <select class="campo-selecao" required>
+                  <select id="listaProdutos" class="campo-selecao" required>
                     <option value=""></option>
                     {% for produto in produtos %}
                       {% if produto.ativo == 1 %}
@@ -214,7 +217,12 @@
     </form>
 
     <!-- Conteúdo da página continua aqui -->
+    
+    <script>
+          $('#listaProdutos').select2
+    </script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+   
     <script defer>
     
     document.addEventListener('DOMContentLoaded', function () {
@@ -323,7 +331,7 @@
         var linha = $(this);
 
         // Colete os valores dos campos na linha atual
-        var produto = linha.find('select').val();
+        var produto = linha.find('select option:selected').text();
         var dose = linha.find('input[id^="dose_"]').val();
         var campo1 = linha.find('input[id^="campo1_"]').val();
         var campo2 = linha.find('input[id^="campo2_"]').val();
@@ -378,11 +386,10 @@
             window.open("{% url 'imprimir_ficha' pk=fcc %}", "_blank");
             window.location.reload();
           } else if (funcao === "funcao2") {
-            // Incrementa o número de recomendação
             window.open("{% url 'ficha_repetir' pk=fcc %}", "_self");
           } else if (funcao === "funcao3") {
-            window.open("{% url 'ficha_repetir' pk=fcc %}", "_self");
             window.open("{% url 'imprimir_ficha' pk=fcc %}", "_blank");
+            window.open("{% url 'ficha_repetir' pk=fcc %}", "_self");
           }
         },
         error: function (error) {

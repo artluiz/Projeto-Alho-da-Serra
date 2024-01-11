@@ -3,7 +3,6 @@
 {% block page_title %} Produtos {% endblock page_title %}
 
 {% block content %}
-    {% if produtos_list %}
     <form action="{% url 'upload_excel' %}" method="post" enctype="multipart/form-data" class=" form-control-lg">
       {% csrf_token %}
           <label for="formFileLg" class="form-label" >Importar Produtos do Excel</label>
@@ -12,6 +11,8 @@
           <button class="btn btn-outline-secondary" type="submit" id="inputFile">Button</button>
         </div>
     </form>
+    {% if produtos_list %}
+    
     <table class="table fs-5">
       <thead>
         <tr>
