@@ -76,7 +76,7 @@ def upload_excel_file(request):
             for _, row in data.iterrows():
                 produto = Produtos()
                 produto.produto = row["Produto"]
-                produto.codigo = row["Codigo"]
+                produto.codigo = row["Cód."]
                 produto.descricao = row["Descrição"]
                 produto.save()
 
@@ -252,6 +252,7 @@ def receber_dados(request):
             data_aplicada=data_aplicada,
             obs=obs,
         )
+        # ficha_aplicacao.objects.using('secondary').all()
         ficha_aplicacao.save()
 
         return JsonResponse({"status": "success"}, safe=False)

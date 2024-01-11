@@ -194,7 +194,7 @@
                 <td><input type="number" step="any" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
                 <td><input type="number" step="any" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
                 <td><input type="number" step="any" id="previsto_{{ i }}" name="previsto_{{ i }}" readonly></td>
-                <td><input type="number" step="any" id="total_{{ i }}" required></td>
+                <td><input type="number" step="any" id="total_{{ i }}"></td>
               </tr>
             {% endfor %}
         </tbody>
@@ -332,7 +332,7 @@
         var total = linha.find('input[id^="total_"]').val();
 
         // Adicione os dados da linha ao array
-        if (produto || dose || total) {
+        if (produto || dose) {
           // Adicione os dados da linha ao array
           console.log(produto);
           dados_tabela.push({
