@@ -4,11 +4,19 @@
 
 {% block content %}
     {% if produtos_list %}
+    <form action="{% url 'upload_excel' %}" method="post" enctype="multipart/form-data" class=" form-control-lg">
+      {% csrf_token %}
+          <label for="formFileLg" class="form-label" >Importar Produtos do Excel</label>
+        <div class="input-group" style="font-size: 1.25em;">
+          <input type="file" class="form-control" id="inputExcel" name="inputExcel" aria-describedby="inputExcel" aria-label="Upload" style="min-width: 210px; max-width: 600px;">
+          <button class="btn btn-outline-secondary" type="submit" id="inputFile">Button</button>
+        </div>
+    </form>
     <table class="table fs-5">
       <thead>
         <tr>
           <th scope="col">#</th>
-          <th scope="col">Nome da Produto</th>
+          <th scope="col">Nome do Produto</th>
           <th scope="col">Codigo</th>
           <th scope="col">Descrição</th>
           <th scope="col">Ações</th>
@@ -37,6 +45,7 @@
     {% else %}
     <p>Não há Produtos cadastradas</p>
     {% endif %}
+    
     <a href="{% url "produtos_create"%}" class="btn btn-primary btn-lg"> Cadastrar produto</a>
     {% endblock content %}
     

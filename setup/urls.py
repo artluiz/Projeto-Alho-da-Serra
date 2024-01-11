@@ -11,6 +11,7 @@ from todos.views import (
     ficha_toggle_active,
     produto_toggle_active,
     estufa_toggle_active,
+    upload_excel_file,
     FichaFiltro,
     FichaListView,
     ImprimirFicha,
@@ -36,6 +37,7 @@ urlpatterns = [
     path(
         "ficha/toggle_p/<int:pk>", ficha_toggle_pendente, name="ficha_toggle_pendente"
     ),
+    path("upload_excel/", upload_excel_file, name="upload_excel"),
     path("ficha/view/<int:pk>/", FichaView, name="ficha_view"),
     path("ficha/imprimir/<int:pk>/", ImprimirFicha, name="imprimir_ficha"),
     path("update/<int:pk>", todo_update, name="ficha_update"),

@@ -6,10 +6,11 @@ from django.views.generic import (
     View,
     DetailView,
 )
+import pandas as pd
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.db.models import Max
 import pytz
 from datetime import datetime
@@ -63,6 +64,31 @@ class FichaFiltro(ListView):
         return queryset
 
 
+def upload_excel_file(request):
+    if request.method == "POST":
+        excel_file = request.FILES["inputExcel"]
+
+        if (
+            str(excel_file).split(".")[-1] == "xls"
+            or str(excel_file).split(".")[-1] == "xlsx"
+        ):
+            data = pd.read_excel(excel_file)
+            for _, row in data.iterrows():
+                produto = Produtos()
+                produto.produto = row["Produto"]
+                produto.codigo = row["Codigo"]
+                produto.descricao = row["Descrição"]
+                produto.save()
+
+            return HttpResponseRedirect(reverse("produtos_list"))
+        else:
+            # Adicione aqui o código para lidar com o caso de o arquivo não ser um Excel
+            pass
+    else:
+        # Adicione aqui o código para lidar com o caso de o método não ser POST
+        pass
+
+
 def estufa_toggle_active(request, pk):
     estufa = get_object_or_404(Estufa, pk=pk)
     estufa.ativo = not estufa.ativo
@@ -92,7 +118,12 @@ def produto_toggle_active(request, pk):
 
 
 def todo_home(request):
-    ficha_aplicacao_count = FichaDeAplicacao.objects.aggregate(Max("id"))["id__max"] + 1
+    ficha_aplicacao_count = FichaDeAplicacao.objects.aggregate(Max("id"))["id__max"]
+    if ficha_aplicacao_count is None:
+        ficha_aplicacao_count = 1
+    else:
+        ficha_aplicacao_count += 1
+
     estufas = Estufa.objects.all()
     atividades = Atividade.objects.all()
     produtos = Produtos.objects.all()
