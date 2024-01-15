@@ -121,7 +121,7 @@
               <h2>N ̊ da Recomendação: E{{ ficha.pk }}<h2/>
           </div>
           <div class="data-operacao">
-              <h2>Data da Operação: {% now 'd/m/Y H:i' %}</h2>
+              <h2>Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</h2>
           </div>
       ' </div>
     </div>
@@ -199,12 +199,12 @@
                   {% endfor %}
                 </select>
               </td>
-              <td><input type="number" id="dose_{{ forloop.counter }}" value = {{ ficha.dose|default:'' }}></td>
-              <td><input type="number" id="campo1_{{ forloop.counter }}" name="campo1_{{ forloop.counter }}" value = {{ ficha.campo1|default:'' }} readonly></td>
-              <td><input type="number" id="campo2_{{ forloop.counter }}" name="campo2_{{ forloop.counter }}" value = {{ ficha.campo2|default:'' }} readonly></td>
-              <td><input type="number" id="anti_camara_{{ forloop.counter }}" name="anti_camara_{{ forloop.counter }}" value = {{ ficha.antiCamara|default:'' }} readonly></td>
-              <td><input type="number" id="previsto_{{ forloop.counter }}" name="previsto_{{ forloop.counter }}" value = {{ ficha.previsto|default:'' }} readonly></td>
-              <td><input type="number" id="total_{{ forloop.counter }}" value = {{ ficha.total|default:'' }}></td>
+              <td><input type="number" step="any" id="dose_{{ forloop.counter }}" value = {{ ficha.dose|default:'' }}></td>
+              <td><input type="number" step="any" id="campo1_{{ forloop.counter }}" name="campo1_{{ forloop.counter }}" value = {{ ficha.campo1|default:'' }} readonly></td>
+              <td><input type="number" step="any" id="campo2_{{ forloop.counter }}" name="campo2_{{ forloop.counter }}" value = {{ ficha.campo2|default:'' }} readonly></td>
+              <td><input type="number" step="any" id="anti_camara_{{ forloop.counter }}" name="anti_camara_{{ forloop.counter }}" value = {{ ficha.antiCamara|default:'' }} readonly></td>
+              <td><input type="number" step="any" id="previsto_{{ forloop.counter }}" name="previsto_{{ forloop.counter }}" value = {{ ficha.previsto|default:'' }} readonly></td>
+              <td><input type="number" step="any" id="total_{{ forloop.counter }}" value = {{ ficha.total|default:'' }}></td>
             </tr>
           {% endfor %}
         </tbody>
@@ -224,6 +224,17 @@
     
     <script>
       $('#listaProdutos').select2
+    </script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $('input[type=number]').on('input', function() {
+        this.value = this.value.match(/^\d+\.?\d{0,2}/);
+      });
+    </script>
+    <script>
+        document.getElementById('previsto_{{ i }}').addEventListener('input', function (e) {
+          e.target.value = parseFloat(e.target.value).toFixed(2); // limita para 2 casas decimais
+        });
     </script>
     <script defer>
     document.addEventListener('DOMContentLoaded', function () {
@@ -286,10 +297,18 @@
             var previsto = area * dose;
 
             // Atualize os campos de entrada com os valores calculados
-            campo.value = valorCampo1;
+            /*campo.value = valorCampo1;
             document.getElementById('campo2_' + indice).value = valorCampo2;
             document.getElementById('anti_camara_' + indice).value = "-";
-            document.getElementById('previsto_' + indice).value = previsto;
+            document.getElementById('previsto_' + indice).value = previsto;*/
+
+            campo.value = parseFloat(valorCampo1).toFixed(2); // limita para 2 casas decimais
+            document.getElementById('campo2_' + indice).value = parseFloat(valorCampo2).toFixed(2);
+            document.getElementById('anti_camara_' + indice).value = "-";
+            
+            var valorCampo1Num = parseFloat(valorCampo1.toFixed(2));
+            var valorCampo2Num = parseFloat(valorCampo2.toFixed(2));
+            document.getElementById('previsto_' + indice).value = (valorCampo1Num + valorCampo2Num).toFixed(2);
 
             }
           });
@@ -303,8 +322,8 @@
             var valorAntiCamara = area * dose;  // Exemplo de cálculo para anti_camara
 
             // Atualize o campo anti_camara com o valor calculado
-            document.getElementById('anti_camara_' + indice).value = valorAntiCamara;
-            document.getElementById('previsto_' + indice).value = valorAntiCamara;
+            document.getElementById('anti_camara_' + indice).value = parseFloat(valorAntiCamara).toFixed(2);
+            document.getElementById('previsto_' + indice).value = parseFloat(valorAntiCamara).toFixed(2);
             campo.value = '-';
             document.getElementById('campo2_' + indice).value = '-';
 
@@ -366,11 +385,13 @@
             estufa_id: estufa_id,
             area: area,
             irrigador_id: irrigador_id,
-            dados_tabela: dados_tabela,
-            data: data,
             ficha_pk: ficha_pk,
+            data: data,
             obs: obsInput,
+            dados_tabela: dados_tabela,
           };
+            console.log(dados);
+            console.log(ficha_pk);
 
           // Envie os dados via AJAX
           $.ajax({
@@ -384,6 +405,7 @@
               window.location.href="{% url "ficha_list"%}";
             },
             error: function (error) {
+              console.log(data);
               console.error(error);
               // Adicione lógica para lidar com erros, se necessário
             }

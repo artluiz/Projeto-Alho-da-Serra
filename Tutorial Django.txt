@@ -1,0 +1,45 @@
+Tutorial Django
+	Manage.py: necessário para carregar os pacotes corretos e inicializar o projeto corretamente;
+	Setup: pastar com arquivos básicos e necessários ao projeto:
+		__init__: necessário para importação de módulos
+		settings: configuração principal do Django, apps importados, middlewares, config do banco, template, linguagem
+		urls: define as rotas da API
+
+	todos:pata das app:
+		admin:configuração do admin;
+		apps: conifgurações básicas da app;
+		models: arquivo que armazena os modelos do banco de dados;
+		templates: parte se se faz o html da aplicação. 
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+Set-Alias python 'C:\Users\kirit\AppData\Local\Programs\Python\Python312\python'
+
+python -m venv .venv       
+
+ & "c:/Users/kirit/Documents/Projeto Alho da Serra/.venv/Scripts/Activate.ps1"  
+
+.\.venv\Scripts\activate
+     
+pip install django 
+
+django-admin startproject setup . 
+
+pip install autopep8
+
+pip install black
+
+pip install dj-database-url
+
+pip install python-decouple
+  
+python manage.py migrate
+
+python manage.py makemigrations
+
+python manage.py runserver     
+
+black .
+
+
+https://www.sqlitetutorial.net/download-install-sqlite/

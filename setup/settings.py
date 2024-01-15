@@ -22,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = "django-insecure-l5y#gry*x16j*@w2l&pwu_wq!qig=)*ioq*ja&d@)b-5h5v4p("
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", cast=bool, default=False)
+DEBUG = True
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "todos.apps",
-    ]
+]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
@@ -88,13 +88,13 @@ DATABASES = {
         default=f"sqlite:///{BASE_DIR / "db.sqlite3"}", 
         cast=db_url
     ),
-    'secondary': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'alho_recomendacao',
-        'USER': 'alho_recomendacao',
-        'PASSWORD': 'alh24luiz',
-        'HOST': 'database2.caioerwlhlbp.us-east-1.rds.amazonaws.com',
-        'PORT': '5432',
+    "secondary": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "alho_recomendacao",
+        "USER": "alho_recomendacao",
+        "PASSWORD": "alh24luiz",
+        "HOST": "database2.caioerwlhlbp.us-east-1.rds.amazonaws.com",
+        "PORT": "5432",
     }
     #'default': {
     #    'ENGINE': 'django.db.backends.sqlite3',

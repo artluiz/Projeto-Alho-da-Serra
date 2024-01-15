@@ -54,20 +54,18 @@
     }
 
     .info p {
-        border: 1px solid black;
-        min-width: 200px;
-        margin: 0;
-        padding: 8px;
+      min-width: 200px;
+      margin: 0;
+      padding: 8px;
     }
 
     .info2{
-        margin-top: 5px;
-        max-width: 600px;
-        display: flex;
+      margin-top: 5px;
+      max-width: 700px;
+      display: flex;
     }
 
     .info2 p {
-        border: 1px solid black;
         min-width: 200px;
         margin: 0;
         padding: 8px;
@@ -102,6 +100,12 @@
         background-color: #f2f2f2;
     }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        document.getElementById('campo1_{{ i }}').addEventListener('blur', function (e) {
+          e.target.value = parseFloat(e.target.value).toFixed(2); // limita para 2 casas decimais
+        });
+    </script>
 <body>
   <div class="cabecalho">
     <!-- Logo da empresa -->
@@ -124,7 +128,7 @@
         <h2>N ̊ da Recomendação: E{{ ficha.pk }}</h2>
       </div>
       <div class="data-operacao">
-        <h2>Data da Operação: {% now 'd/m/Y H:i' %}</h2>
+        <h2>Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</h2>
       </div>
     </div>
   </div>
@@ -143,7 +147,7 @@
       <div >
         <p>
           Data da Aplicação: 
-          <span>{{ ficha.data_aplicada|date:'Y-m-d' }}</span>
+          <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span>
         </p>
       </div>
     </div>
@@ -199,22 +203,22 @@
           <span class="campo-selecao"> {{ ficha.produto|default:'' }} </span>
         </td>
         <td>
-          <span>{{ ficha.dose|default:'' }}</span>
+          <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.campo1|default:'' }}</span>
+          <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.campo2|default:'' }}</span>
+          <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.antiCamara|default:'' }}</span>
+          <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.previsto|default:'' }}</span>
+          <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.total|default:'' }}</span>
+          <span>{{ ficha.total|floatformat:2 }}</span>
         </td>
       </tr>
       {% endfor %}
@@ -230,4 +234,13 @@
   
     <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-lg mt-2"> Voltar</a>
 </body>
+<script>
+        $(document).ready(function(){
+            $('input').on('keypress', function(e){
+                if(e.which == 13) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
 {% endblock content %}

@@ -90,7 +90,6 @@ def upload_excel_file(request):
                 produto.codigo = row["Cód."]
                 produto.descricao = row["Descrição"]
                 produto.save()
-                produto.save(using="secondary")
 
             return HttpResponseRedirect(reverse("produtos_list"))
         else:
@@ -105,7 +104,6 @@ def estufa_toggle_active(request, pk):
     estufa = get_object_or_404(Estufa, pk=pk)
     estufa.ativo = not estufa.ativo
     estufa.save()
-    estufa.save(using="secondary")
     return redirect(reverse("estufa_list"))
 
 
@@ -113,7 +111,6 @@ def ficha_toggle_active(request, pk):
     ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
     ficha.ativo = not ficha.ativo
     ficha.save()
-    ficha.save(using="secondary")
     return redirect(reverse("ficha_list"))
 
 
@@ -121,7 +118,6 @@ def ficha_toggle_pendente(request, pk):
     ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
     ficha.pendente = not ficha.pendente
     ficha.save()
-    ficha.save(using="secondary")
     return redirect(reverse("ficha_list"))
 
 
@@ -129,14 +125,13 @@ def produto_toggle_active(request, pk):
     produto = get_object_or_404(Produtos, pk=pk)
     produto.ativo = not produto.ativo
     produto.save()
-    produto.save(using="secondary")
     return redirect(reverse("produtos_list"))
 
 
 def todo_home(request):
     ficha_aplicacao_count = FichaDeAplicacao.objects.aggregate(Max("id"))["id__max"]
     if ficha_aplicacao_count is None:
-        ficha_aplicacao_count = 1178
+        ficha_aplicacao_count = 1179
     else:
         ficha_aplicacao_count += 1
 
@@ -245,10 +240,7 @@ def receber_dados(request):
             data_aplicada=data_aplicada,
             obs=obs,
         )
-        # ficha_aplicacao.objects.using('secondary').all()
         ficha_aplicacao.save()
-
-        ficha_aplicacao.save(using="secondary")
 
         return JsonResponse({"status": "success"}, safe=False)
     else:
@@ -261,7 +253,7 @@ def atualizar_dados(request):
         print(request.body)
         # Decodifique os bytes para uma string e carregue o JSON
         dados = json.loads(request.body.decode("utf-8"))
-
+        print(dados)
         # Obtenha a ficha existente pelo id
         ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=dados["ficha_pk"])
 
@@ -275,7 +267,7 @@ def atualizar_dados(request):
         )
         ficha_aplicacao.dados = dados["dados_tabela"]
         # ficha_aplicacao.data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
-        ficha_aplicacao.data_aplicada = datetime.strptime(dados["data1"], "%Y-%m-%d")
+        ficha_aplicacao.data_aplicada = datetime.strptime(dados["data"], "%Y-%m-%d")
 
         # ficha_aplicacao.data_planejada = pytz.timezone("America/Sao_Paulo").localize(
         #    ficha_aplicacao.data_planejada
@@ -285,8 +277,8 @@ def atualizar_dados(request):
         )
 
         # Salve a instância para atualizar o banco de dados
+        print(ficha_aplicacao)
         ficha_aplicacao.save()
-        ficha_aplicacao.save(using="secondary")
 
         return JsonResponse({"status": "success"}, safe=False)
     else:
@@ -342,6 +334,9 @@ def FichaView(request, pk):
 class FichaListView(ListView):
     model = FichaDeAplicacao
 
+    def get_queryset(self):
+        return FichaDeAplicacao.objects.all().order_by("id")
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["estufas"] = Estufa.objects.all()
@@ -365,7 +360,6 @@ class EstufaCreateView(CreateView):
         # Atualiza no banco de dados primário
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
-        form.instance.save(using="secondary")
         return super().form_valid(form)
 
 
@@ -378,7 +372,6 @@ class EstufaUpdateView(UpdateView):
         # Atualiza no banco de dados primário
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
-        form.instance.save(using="secondary")
         return super().form_valid(form)
 
 
@@ -399,7 +392,6 @@ class AtividadeCreateView(CreateView):
         # Atualiza no banco de dados primário
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
-        form.instance.save(using="secondary")
         return super().form_valid(form)
 
 
@@ -412,7 +404,6 @@ class AtividadeUpdateView(UpdateView):
         # Atualiza no banco de dados primário
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
-        form.instance.save(using="secondary")
         return super().form_valid(form)
 
 
@@ -433,7 +424,6 @@ class ProdutosCreateView(CreateView):
         # Atualiza no banco de dados primário
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
-        form.instance.save(using="secondary")
         return super().form_valid(form)
 
 
@@ -446,7 +436,6 @@ class ProdutosUpdateView(UpdateView):
         # Atualiza no banco de dados primário
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
-        form.instance.save(using="secondary")
         return super().form_valid(form)
 
 
