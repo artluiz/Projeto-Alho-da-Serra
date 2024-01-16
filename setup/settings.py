@@ -88,15 +88,7 @@ DATABASES = {
         "DATABASE_URL", 
         default=f"sqlite:///{BASE_DIR / "db.sqlite3"}", 
         cast=db_url
-    ),
-    "secondary": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "alho_recomendacao",
-        "USER": "alho_recomendacao",
-        "PASSWORD": "alh24luiz",
-        "HOST": "database2.caioerwlhlbp.us-east-1.rds.amazonaws.com",
-        "PORT": "5432",
-    }
+    )
     #'default': {
     #    'ENGINE': 'django.db.backends.sqlite3',
     #    'NAME': BASE_DIR / 'db.sqlite3',

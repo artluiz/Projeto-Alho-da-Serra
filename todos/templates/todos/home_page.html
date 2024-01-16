@@ -208,11 +208,9 @@
           OBS: <input type="text" id="id_obs" style="width: 95%;">
         </p>
       </div>
-        <button class="enviarDados btn btn-primary btn-lg mt-3" data-funcao="funcao1">Salvar e Imprimir</button>
-
-        <button class="enviarDados btn btn-secondary btn-lg mt-3" data-funcao="funcao2">Salvar e Repetir</button>
-
-        <button class="enviarDados btn btn-success btn-lg mt-3" data-funcao="funcao3">Salvar, Imprimir e Repetir</button>
+        <a class="enviarDados btn btn-primary btn-lg mt-3" data-funcao="funcao1" href="#">Salvar e Imprimir</a>
+        <a class="enviarDados btn btn-secondary btn-lg mt-3" data-funcao="funcao2" href="#">Salvar e Repetir</a>
+        <a class="enviarDados btn btn-success btn-lg mt-3" data-funcao="funcao3" href="#">Salvar, Imprimir e Repetir</a>
 
     </form>
 
@@ -222,11 +220,6 @@
           $('#listaProdutos').select2
     </script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <script>
-        document.getElementById('campo1_{{ i }}').addEventListener('blur', function (e) {
-          e.target.value = parseFloat(e.target.value).toFixed(2); // limita para 2 casas decimais
-        });
-    </script>
     <script>
       $('input[type=number]').on('input', function() {
         this.value = this.value.match(/^\d+\.?\d{0,2}/);
@@ -337,89 +330,103 @@
     });
     </script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script defer>
-  document.querySelectorAll('.enviarDados').forEach(function(button) {
-    button.addEventListener('click', function () {
-      var areaSpan = document.getElementById('id_area');
-      var funcao = button.getAttribute('data-funcao');
-      
-      // Crie um array para armazenar os dados das linhas preenchidas da tabela
-      var dados_tabela = [];
+    <script defer>
+      document.querySelectorAll('.enviarDados').forEach(function(link) {
+        var clickHandler = function (event) {
+          event.preventDefault(); // Evita que o link seja seguido imediatamente
 
-      // Itere sobre as linhas da tabela
-      $('table tbody tr').each(function () {
-        var linha = $(this);
+          var areaSpan = document.getElementById('id_area');
+          var funcao = link.getAttribute('data-funcao');
+          
+          // Crie um array para armazenar os dados das linhas preenchidas da tabela
+          var dados_tabela = [];
 
-        // Colete os valores dos campos na linha atual
-        var produto = linha.find('select option:selected').text();
-        var dose = linha.find('input[id^="dose_"]').val();
-        var campo1 = linha.find('input[id^="campo1_"]').val();
-        var campo2 = linha.find('input[id^="campo2_"]').val();
-        var antiCamara = linha.find('input[id^="anti_camara_"]').val();
-        var previsto = linha.find('input[id^="previsto_"]').val();
-        var total = linha.find('input[id^="total_"]').val();
+          // Itere sobre as linhas da tabela
+          $('table tbody tr').each(function () {
+            var linha = $(this);
 
-        // Adicione os dados da linha ao array
-        if (produto || dose) {
-          // Adicione os dados da linha ao array
-          console.log(produto);
-          dados_tabela.push({
-            produto: produto,
-            dose: dose,
-            campo1: campo1,
-            campo2: campo2,
-            antiCamara: antiCamara,
-            previsto: previsto,
-            total: total
+            // Colete os valores dos campos na linha atual
+            var produto = linha.find('select option:selected').text();
+            var dose = linha.find('input[id^="dose_"]').val();
+            var campo1 = linha.find('input[id^="campo1_"]').val();
+            var campo2 = linha.find('input[id^="campo2_"]').val();
+            var antiCamara = linha.find('input[id^="anti_camara_"]').val();
+            var previsto = linha.find('input[id^="previsto_"]').val();
+            var total = linha.find('input[id^="total_"]').val();
+
+            // Adicione os dados da linha ao array
+            if (produto || dose) {
+              // Adicione os dados da linha ao array
+              console.log(produto);
+              dados_tabela.push({
+                produto: produto,
+                dose: dose,
+                campo1: campo1,
+                campo2: campo2,
+                antiCamara: antiCamara,
+                previsto: previsto,
+                total: total
+              });
+            }
           });
-        }
-      });
 
-      // Colete os valores das quatro variáveis
-      var atividade_id = $('#id_atividade option:selected').val();
-      var estufa_id = $('#id_estufa option:selected').val();
-      var area = parseFloat(areaSpan.innerText.replace(',', '.'));
-      var irrigador_id = $('#id_tipo_irrigador option:selected').val();
-      var data1 = $('#data').val();
-      var obs = $('#id_obs').val();
+          // Colete os valores das quatro variáveis
+          var atividade_id = $('#id_atividade option:selected').val();
+          var estufa_id = $('#id_estufa option:selected').val();
+          var area = parseFloat(areaSpan.innerText.replace(',', '.'));
+          var irrigador_id = $('#id_tipo_irrigador option:selected').val();
+          var data1 = $('#data').val();
+          var obs = $('#id_obs').val();
 
-      // Crie um objeto de dados com as quatro variáveis e a tabela
-      var dados = {
-        atividade_id: atividade_id,
-        estufa_id: estufa_id,
-        area: area,
-        irrigador_id: irrigador_id,
-        dados_tabela: dados_tabela,
-        data1: data1,
-        obs: obs,
+          // Crie um objeto de dados com as quatro variáveis e a tabela
+          var dados = {
+            atividade_id: atividade_id,
+            estufa_id: estufa_id,
+            area: area,
+            irrigador_id: irrigador_id,
+            dados_tabela: dados_tabela,
+            data1: data1,
+            obs: obs,
+          };
+
+          // Envie os dados via AJAX
+          $.ajax({
+          url: "{% url 'receber_dados' %}",
+          type: 'post',
+          data: JSON.stringify(dados),
+          contentType: 'application/json',
+          dataType: 'json',
+          success: function(data){
+            link.removeEventListener('click', clickHandler); // Remove o ouvinte de eventos
+
+            if (funcao === "funcao1") {
+              link.href = "{% url 'imprimir_ficha' pk=fcc %}";
+              link.target = "_blank";
+              link.click();
+              window.location.reload();
+            } else if (funcao === "funcao2") {
+              link.href = "{% url 'ficha_repetir' pk=fcc %}";
+              link.target = "_self";
+              link.click();
+            } else if (funcao === "funcao3") {
+              link.href = "{% url 'imprimir_ficha' pk=fcc %}";
+              link.target = "_blank";
+              link.click();
+              link.href = "{% url 'ficha_repetir' pk=fcc %}";
+              link.target = "_self";
+              link.click();
+            }
+          },
+          error: function (error) {
+            console.error(error);
+            // Adicione lógica para lidar com erros, se necessário
+          }
+        });
       };
 
-      // Envie os dados via AJAX
-      $.ajax({
-        url: "{% url 'receber_dados' %}",
-        type: 'post',
-        data: JSON.stringify(dados),
-        contentType: 'application/json',
-        dataType: 'json',
-        success: function(data){
-          if (funcao === "funcao1") {
-            window.open("{% url 'imprimir_ficha' pk=fcc %}", "_blank");
-            window.location.reload();
-          } else if (funcao === "funcao2") {
-            window.open("{% url 'ficha_repetir' pk=fcc %}", "_self");
-          } else if (funcao === "funcao3") {
-            window.open("{% url 'imprimir_ficha' pk=fcc %}", "_blank");
-            window.open("{% url 'ficha_repetir' pk=fcc %}", "_self");
-          }
-        },
-        error: function (error) {
-          console.error(error);
-          // Adicione lógica para lidar com erros, se necessário
-        }
-      });
+      link.addEventListener('click', clickHandler);
     });
-  });
-</script>
+    </script>
 
   </body>
 
