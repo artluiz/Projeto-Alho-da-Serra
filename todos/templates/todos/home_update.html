@@ -171,6 +171,8 @@
             {% endfor %}
           </select>
         </p>
+        <i> <span id="warn" name="warn" style= "padding:300px"></span>
+          </i>
       </div>
       <table>
         <thead>
@@ -199,7 +201,7 @@
                   {% endfor %}
                 </select>
               </td>
-              <td><input type="number" step="any" id="dose_{{ forloop.counter }}" value = {{ ficha.dose|default:'' }}></td>
+              <td><input type="text" step="0.01" id="dose_{{ forloop.counter }}" value = {{ ficha.dose|default:'' }}></td>
               <td><input type="number" step="any" id="campo1_{{ forloop.counter }}" name="campo1_{{ forloop.counter }}" value = {{ ficha.campo1|default:'' }} readonly></td>
               <td><input type="number" step="any" id="campo2_{{ forloop.counter }}" name="campo2_{{ forloop.counter }}" value = {{ ficha.campo2|default:'' }} readonly></td>
               <td><input type="number" step="any" id="anti_camara_{{ forloop.counter }}" name="anti_camara_{{ forloop.counter }}" value = {{ ficha.antiCamara|default:'' }} readonly></td>
@@ -290,7 +292,7 @@
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
 
-            var dose = document.getElementById('dose_' + indice).value;
+            var dose = parseFloat(document.getElementById('dose_' + indice).value.replace(',', '.'));
 
             var valorCampo1 = (area * dose)/2; //exemplo de cálculo
             var valorCampo2 = (area * dose)/2;
@@ -318,7 +320,7 @@
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
 
-            var dose = document.getElementById('dose_' + indice).value;
+            var dose = parseFloat(document.getElementById('dose_' + indice).value.replace(',', '.'));
             var valorAntiCamara = area * dose;  // Exemplo de cálculo para anti_camara
 
             // Atualize o campo anti_camara com o valor calculado
@@ -342,6 +344,7 @@
         $('#enviarDados').on('click', function () {
           // Crie um array para armazenar os dados das linhas preenchidas da tabela
           var dados_tabela = [];
+          var veri = '';
 
           // Itere sobre as linhas da tabela
           $('table tbody tr').each(function () {
@@ -349,7 +352,7 @@
 
             // Colete os valores dos campos na linha atual
             var produto = linha.find('select').val();
-            var dose = linha.find('input[id^="dose_"]').val();
+            var dose = parseFloat(linha.find('input[id^="dose_"]').val().replace(',', '.'));
             var campo1 = linha.find('input[id^="campo1_"]').val();
             var campo2 = linha.find('input[id^="campo2_"]').val();
             var antiCamara = linha.find('input[id^="anti_camara_"]').val();
@@ -357,17 +360,22 @@
             var total = linha.find('input[id^="total_"]').val();
 
             // Adicione os dados da linha ao array
-            if (produto && dose || total) {
+            if(produto){
+              if ( Number.isNaN(dose) ) {
                 // Adicione os dados da linha ao array
+                veri = 'fake';
+              }else{
+                console.log(produto);
                 dados_tabela.push({
-                    produto: produto,
-                    dose: dose,
-                    campo1: campo1,
-                    campo2: campo2,
-                    antiCamara: antiCamara,
-                    previsto: previsto,
-                    total: total
+                  produto: produto,
+                  dose: dose,
+                  campo1: campo1,
+                  campo2: campo2,
+                  antiCamara: antiCamara,
+                  previsto: previsto,
+                  total: total
                 });
+              }
             }
           });
 
@@ -390,26 +398,31 @@
             obs: obsInput,
             dados_tabela: dados_tabela,
           };
-            console.log(dados);
-            console.log(ficha_pk);
 
           // Envie os dados via AJAX
-          $.ajax({
-            url: "{% url 'atualizar_dados' %}",
-            type: 'put',
-            data: JSON.stringify(dados),
-            contentType: 'application/json',
-            dataType: 'json',
-            success: function(data){
-              console.log(data);
-              window.location.href="{% url "ficha_list"%}";
-            },
-            error: function (error) {
-              console.log(data);
-              console.error(error);
-              // Adicione lógica para lidar com erros, se necessário
-            }
-          });
+          if(veri != 'fake'){
+            
+            $("#warn").text("");
+            $.ajax({
+              url: "{% url 'atualizar_dados' %}",
+              type: 'put',
+              data: JSON.stringify(dados),
+              contentType: 'application/json',
+              dataType: 'json',
+              success: function(data){
+                console.log(data);
+                window.location.href="{% url "ficha_list"%}";
+              },
+              error: function (error) {
+                console.log(data);
+                console.error(error);
+                // Adicione lógica para lidar com erros, se necessário
+              }
+            });
+          }else{
+            $("#warn").text("Digite dados válidos");
+
+          }
         });
       });
     </script>

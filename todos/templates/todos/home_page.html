@@ -164,6 +164,8 @@
             {% endfor %}
           </select>
         </p>
+          <i> <span id="warn" name="warn" style= "boreder:none"></span>
+          </i>
       </div>
       <table>
         <thead>
@@ -192,7 +194,7 @@
                     {% endfor %}
                   </select>
                 </td>
-                <td><input type="number" id="dose_{{ i }}" required></td>
+                <td><input type="text" pattern="^\d*(\.\d{0,2})?$"  id="dose_{{ i }}" required></td>
                 <td><input type="number" step="any" id="campo1_{{ i }}" name="campo1_{{ i }}" readonly></td>
                 <td><input type="number" step="any" id="campo2_{{ i }}" name="campo2_{{ i }}" readonly></td>
                 <td><input type="number" step="any" id="anti_camara_{{ i }}" name="anti_camara_{{ i }}" readonly></td>
@@ -239,7 +241,6 @@
     document.addEventListener('DOMContentLoaded', function () {
       var areaSpan = document.getElementById('id_area');
       var tipoIrrigadorInput = document.getElementById('id_tipo_irrigador');
-
       var camposDinamicos = document.querySelectorAll('[id^="campo1_"]');
 
       document.getElementById('id_estufa').addEventListener('change', function () {
@@ -284,15 +285,13 @@
         var area = parseFloat(areaSpan.innerText.replace(',', '.')) || 0;
         var tipoIrrigador = tipoIrrigadorInput.value;
 
-
         if (tipoIrrigador === '1') {
           camposDinamicos.forEach(function (campo) {
             // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
-
-            var dose = document.getElementById('dose_' + indice).value;
-
+            
+            var dose = parseFloat(document.getElementById('dose_' + indice).value.replace(',', '.'));
             var valorCampo1 = (area * dose)/2; //exemplo de cálculo
             var valorCampo2 = (area * dose)/2;
             var previsto = area * dose;
@@ -312,8 +311,8 @@
             // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
             var indice = campo.id.split('_')[1];
             if(document.getElementById('dose_' + indice).value){
+            var dose = parseFloat(document.getElementById('dose_' + indice).value.replace(',', '.'));
 
-            var dose = document.getElementById('dose_' + indice).value;
             var valorAntiCamara = area * dose;  // Exemplo de cálculo para anti_camara
 
             // Atualize o campo anti_camara com o valor calculado
@@ -340,14 +339,15 @@
           
           // Crie um array para armazenar os dados das linhas preenchidas da tabela
           var dados_tabela = [];
-
+          var veri = '';
           // Itere sobre as linhas da tabela
           $('table tbody tr').each(function () {
             var linha = $(this);
 
             // Colete os valores dos campos na linha atual
             var produto = linha.find('select option:selected').text();
-            var dose = linha.find('input[id^="dose_"]').val();
+            var dose = parseFloat(linha.find('input[id^="dose_"]').val().replace(',', '.'));
+            console.log(dose);
             var campo1 = linha.find('input[id^="campo1_"]').val();
             var campo2 = linha.find('input[id^="campo2_"]').val();
             var antiCamara = linha.find('input[id^="anti_camara_"]').val();
@@ -355,18 +355,22 @@
             var total = linha.find('input[id^="total_"]').val();
 
             // Adicione os dados da linha ao array
-            if (produto || dose) {
-              // Adicione os dados da linha ao array
-              console.log(produto);
-              dados_tabela.push({
-                produto: produto,
-                dose: dose,
-                campo1: campo1,
-                campo2: campo2,
-                antiCamara: antiCamara,
-                previsto: previsto,
-                total: total
-              });
+            if(produto){
+              if ( Number.isNaN(dose) ) {
+                // Adicione os dados da linha ao array
+                veri = 'fake';
+              }else{
+                console.log(produto);
+                dados_tabela.push({
+                  produto: produto,
+                  dose: dose,
+                  campo1: campo1,
+                  campo2: campo2,
+                  antiCamara: antiCamara,
+                  previsto: previsto,
+                  total: total
+                });
+              }
             }
           });
 
@@ -390,38 +394,45 @@
           };
 
           // Envie os dados via AJAX
-          $.ajax({
-          url: "{% url 'receber_dados' %}",
-          type: 'post',
-          data: JSON.stringify(dados),
-          contentType: 'application/json',
-          dataType: 'json',
-          success: function(data){
-            link.removeEventListener('click', clickHandler); // Remove o ouvinte de eventos
+          if(veri != 'fake'){
+            
+            $("#warn").text("");
+            $.ajax({
+              url: "{% url 'receber_dados' %}",
+              type: 'post',
+              data: JSON.stringify(dados),
+              contentType: 'application/json',
+              dataType: 'json',
+              success: function(data){
+                link.removeEventListener('click', clickHandler); // Remove o ouvinte de eventos
 
-            if (funcao === "funcao1") {
-              link.href = "{% url 'imprimir_ficha' pk=fcc %}";
-              link.target = "_blank";
-              link.click();
-              window.location.reload();
-            } else if (funcao === "funcao2") {
-              link.href = "{% url 'ficha_repetir' pk=fcc %}";
-              link.target = "_self";
-              link.click();
-            } else if (funcao === "funcao3") {
-              link.href = "{% url 'imprimir_ficha' pk=fcc %}";
-              link.target = "_blank";
-              link.click();
-              link.href = "{% url 'ficha_repetir' pk=fcc %}";
-              link.target = "_self";
-              link.click();
-            }
-          },
-          error: function (error) {
-            console.error(error);
-            // Adicione lógica para lidar com erros, se necessário
+                if (funcao === "funcao1") {
+                  link.href = "{% url 'imprimir_ficha' pk=fcc %}";
+                  link.target = "_blank";
+                  link.click();
+                  window.location.reload();
+                } else if (funcao === "funcao2") {
+                  link.href = "{% url 'ficha_repetir' pk=fcc %}";
+                  link.target = "_self";
+                  link.click();
+                } else if (funcao === "funcao3") {
+                  link.href = "{% url 'imprimir_ficha' pk=fcc %}";
+                  link.target = "_blank";
+                  link.click();
+                  link.href = "{% url 'ficha_repetir' pk=fcc %}";
+                  link.target = "_self";
+                  link.click();
+                }
+              },
+              error: function (error) {
+                console.error(error);
+                // Adicione lógica para lidar com erros, se necessário
+              }
+            });
+          }else{
+            $("#warn").text("Digite dados válidos");
+
           }
-        });
       };
 
       link.addEventListener('click', clickHandler);
