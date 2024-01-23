@@ -24,17 +24,13 @@ from django.shortcuts import render
 
 class FichaFiltro(ListView):
     model = FichaDeAplicacao
-    template_name = "fichadeaplicacao_list.html"
     context_object_name = "fichadeaplicacao_list"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # Adicione os objetos Estufa, Atividade e TipoIrrigador ao contexto
         context["estufas"] = Estufa.objects.all()
         context["atividades"] = Atividade.objects.all()
         context["tipo_irrigadores"] = TipoIrrigador.objects.all()
-
         return context
 
     def get_queryset(self):
@@ -45,7 +41,6 @@ class FichaFiltro(ListView):
         estufa_filter = self.request.GET.get("estufa_filter")
         status_filter = self.request.GET.get("status_filter")
 
-        # Adicione lógica para filtrar o queryset com base nos parâmetros fornecidos
         if data_filter:
             queryset = queryset.filter(data_criada__date=data_filter)
 
@@ -62,6 +57,12 @@ class FichaFiltro(ListView):
                 queryset = queryset.filter(pendente=True)
 
         return queryset
+
+    def get_template_names(self):
+        # Verifique a parte da URL para decidir qual template usar
+        if "relatorio" in self.request.path:
+            return ["fichadeaplicacao_relatorio.html"]
+        return ["fichadeaplicacao_list.html"]
 
 
 def upload_excel_file(request):
@@ -331,8 +332,15 @@ def FichaView(request, pk):
     return render(request, "todos/ficha_view.html", context)
 
 
+# views.py
+from django.views.generic import ListView
+from .models import FichaDeAplicacao, Estufa, Atividade, TipoIrrigador
+from django.urls import reverse_lazy
+
+
 class FichaListView(ListView):
     model = FichaDeAplicacao
+    template_name = "fichadeaplicacao_list.html"
 
     def get_queryset(self):
         return FichaDeAplicacao.objects.all().order_by("id")
@@ -344,7 +352,11 @@ class FichaListView(ListView):
         context["tipo_irrigadores"] = TipoIrrigador.objects.all()
         return context
 
-    success_url = reverse_lazy("ficha_list")
+    def get_template_names(self):
+        # Verifique a parte da URL para decidir qual template usar
+        if "relatorio" in self.request.path:
+            return ["fichadeaplicacao_relatorio.html"]
+        return ["fichadeaplicacao_list.html"]
 
 
 class EstufaListView(ListView):

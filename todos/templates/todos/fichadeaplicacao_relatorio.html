@@ -1,0 +1,116 @@
+{% extends "base.html" %} {% load crispy_forms_tags %}
+
+{% block page_title %} Relatório {% endblock page_title %}
+
+{% block content %}
+  <style>
+  th {
+    text-align: center;
+  }
+  td {
+    text-align: center;
+  }
+  ul {
+    list-style: none;
+  }
+  .ul_first{
+    list-style: number;
+    text-align: left;
+  }
+  </style>
+  <script src="https://kit.fontawesome.com/ae773d5972.js" crossorigin="anonymous"></script>
+  <form method="get" action="{% url 'ficha_filtro_relatorio' %}" class="form-inline mt-3" fixed-form>
+  <div class="input-group input-group-lg">
+    <label class="input-group-text" id="basic-addon1" for="data_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Data:</label>
+    <input type="date" id="data_filter" name="data_filter" class="form-control" style="max-width: 500px;">
+    
+    <label class="input-group-text" id="basic-addon1" for="atividade_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Atividade:</label>
+    <select id="atividade_filter" name="atividade_filter" class="form-control" style="max-width: 500px;">
+        <option value="" selected>Selecione uma Atividade</option>
+        {% for atividade in atividades %}
+            <option value="{{ atividade.id }}">{{ atividade.nome }}</option>
+        {% endfor %}
+    </select>
+    
+    <label class="input-group-text" id="basic-addon1" for="estufa_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Estufa:</label>
+    <select id="estufa_filter" name="estufa_filter" class="form-control" style="max-width: 500px;">
+        <option value="" selected>Selecione uma Estufa</option>
+        {% for estufa in estufas %}
+            <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
+        {% endfor %}
+    </select>
+  </div>
+  <div class="input-group input-group-lg">
+  <label class="input-group-text" id="basic-addon1" for="status_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Status:</label>
+    <select class="form-select" id="status_filter"  name="status_filter" style="max-width: 500px;">
+        <option value="" selected>Selecione um Status</option>
+        <option value="true" {% if request.GET.status_filter == 'true' %}selected{% endif %}>Pendente</option>
+        <option value="false" {% if request.GET.status_filter == 'false' %}selected{% endif %}>Concluída</option>
+    </select>
+  </div>
+  <div class="input-group input-group-lg">
+    <button type="submit" class="btn btn-primary btn" >Filtrar</button>
+  </div>
+  </form>
+  {% if fichadeaplicacao_list %}
+  <table class="table fs-5  mt-3">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Data de Aplicação</th>
+        <th scope="col">Atividade</th>
+        <th scope="col">Irrigação</th>
+        <th scope="col">Estufa</th>
+        <th scope="col">Produtos</th>
+        <th scope="col">Dose(Kg ou L)</th>
+        <th scope="col">Consumo Previsto(Kg ou L)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for ficha in fichadeaplicacao_list %}
+        {% if ficha.ativo %}
+          <tr>
+              <th scope="row">E{{ ficha.pk }}</th>
+              <td>{{ ficha.data_aplicada }}</td>
+              <td>{{ ficha.atividade.nome }}</td>
+              <td>{{ ficha.irrigador.nome_tipo }}</td>
+              <td>{{ ficha.estufa.nome_estufa }}</td>
+              <td>
+                <ul class="ul_first">
+                {% for ficha in ficha.dados %}
+                  <li>
+                    <span class="campo-selecao"> {{ ficha.produto|default:''|safe }} </span>
+                  </li>
+                {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <ul>
+                {% for ficha in ficha.dados %}
+                  <li>
+                    <span>{{ ficha.dose|floatformat:2|default:''|safe }}</span>
+                  </li>
+                {% endfor %}
+                </ul>
+              </td>
+              <td>
+                <ul>
+                {% for ficha in ficha.dados %}
+                  <li>
+                    <span>{{ ficha.previsto|floatformat:2|default:''|safe }}</span>
+                  </li>
+                {% endfor %}
+                </ul>
+              </td>
+              <!--<a href="{% url 'ficha_toggle_active' pk=ficha.pk %}" {% if  ficha.ativo %}class="btn btn-danger btn "{% else %}class="btn btn-success btn"{% endif %} 
+              >{% if ficha.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>-->
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Não há fichas cadastradas</p>
+  {% endif %}
+  <a href="{% url "ficha_list"%}" class="btn btn-primary btn-lg"> Voltar</a>
+  {% endblock content %}

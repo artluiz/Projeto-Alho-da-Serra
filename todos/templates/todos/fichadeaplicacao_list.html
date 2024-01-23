@@ -13,37 +13,36 @@
   </style>
   <script src="https://kit.fontawesome.com/ae773d5972.js" crossorigin="anonymous"></script>
   <form method="get" action="{% url 'ficha_filtro' %}" class="form-inline mt-3" fixed-form>
-  <div class="input-group input-group-lg">
-    <label class="input-group-text" id="basic-addon1" for="data_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Data:</label>
-    <input type="date" id="data_filter" name="data_filter" class="form-control" style="max-width: 500px;">
-    
-    <label class="input-group-text" id="basic-addon1" for="atividade_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Atividade:</label>
-    <select id="atividade_filter" name="atividade_filter" class="form-control" style="max-width: 500px;">
-        <option value="" selected>Selecione uma Atividade</option>
-        {% for atividade in atividades %}
-            <option value="{{ atividade.id }}">{{ atividade.nome }}</option>
-        {% endfor %}
-    </select>
-    
-    <label class="input-group-text" id="basic-addon1" for="estufa_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Estufa:</label>
-    <select id="estufa_filter" name="estufa_filter" class="form-control" style="max-width: 500px;">
-        <option value="" selected>Selecione uma Estufa</option>
-        {% for estufa in estufas %}
-            <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
-        {% endfor %}
-    </select>
-  </div>
-  <div class="input-group input-group-lg">
-  <label class="input-group-text" id="basic-addon1" for="status_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Status:</label>
-    <select class="form-select" id="status_filter"  name="status_filter" style="max-width: 500px;">
-        <option value="" selected>Selecione um Status</option>
-        <option value="true" {% if request.GET.status_filter == 'true' %}selected{% endif %}>Pendente</option>
-        <option value="false" {% if request.GET.status_filter == 'false' %}selected{% endif %}>Concluída</option>
-    </select>
-  </div>
-  <div class="input-group input-group-lg">
-    <button type="submit" class="btn btn-primary btn" >Filtrar</button>
-  </div>
+    <div class="d-flex">
+      <div class="input-group input-group-lg">
+        <label class="input-group-text" id="basic-addon1" for="data_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Data:</label>
+        <input type="date" id="data_filter" name="data_filter" class="form-control" style="max-width: 500px;">
+        
+        <label class="input-group-text" id="basic-addon1" for="atividade_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Atividade:</label>
+        <select id="atividade_filter" name="atividade_filter" class="form-control" style="max-width: 500px;">
+            <option value="" selected>Selecione uma Atividade</option>
+            {% for atividade in atividades %}
+                <option value="{{ atividade.id }}">{{ atividade.nome }}</option>
+            {% endfor %}
+        </select>
+        
+        <label class="input-group-text" id="basic-addon1" for="estufa_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Estufa:</label>
+        <select id="estufa_filter" name="estufa_filter" class="form-control" style="max-width: 500px;">
+            <option value="" selected>Selecione uma Estufa</option>
+            {% for estufa in estufas %}
+                <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
+            {% endfor %}
+        </select>
+      <label class="input-group-text" id="basic-addon1" for="status_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Status:</label>
+        <select class="form-select" id="status_filter"  name="status_filter" style="max-width: 500px;">
+            <option value="" selected>Selecione um Status</option>
+            <option value="true" {% if request.GET.status_filter == 'true' %}selected{% endif %}>Pendente</option>
+            <option value="false" {% if request.GET.status_filter == 'false' %}selected{% endif %}>Concluída</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn" >Filtrar</button>
+        <button type="submit" class="btn btn-secondary btn" formaction="{% url 'ficha_filtro_relatorio' %}">Relatório</button>
+      </div>
+    </div>
   </form>
   {% if fichadeaplicacao_list %}
   <table class="table fs-5  mt-3">

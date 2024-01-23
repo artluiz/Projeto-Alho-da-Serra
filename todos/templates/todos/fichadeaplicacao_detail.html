@@ -214,13 +214,13 @@
           <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.campo1 %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.campo2 %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.antiCamara %}Kg ou L{% endif %}</span>
         </td>
         <td>
           <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>

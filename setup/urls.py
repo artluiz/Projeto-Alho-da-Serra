@@ -44,8 +44,12 @@ urlpatterns = [
     path("repetir/<int:pk>", todo_repetir, name="ficha_repetir"),
     path("receber_dados/", receber_dados, name="receber_dados"),
     path("atualizar_dados/", atualizar_dados, name="atualizar_dados"),
-    path("ficha", FichaListView.as_view(), name="ficha_list"),
+    path("ficha/", FichaListView.as_view(), name="ficha_list"),
+    path("ficha/relatorio/", FichaListView.as_view(), name="ficha_relatorio"),
     path("ficha_filtro/", FichaFiltro.as_view(), name="ficha_filtro"),
+    path(
+        "ficha_filtro/relatorio/", FichaFiltro.as_view(), name="ficha_filtro_relatorio"
+    ),
     path("estufa", EstufaListView.as_view(), name="estufa_list"),
     path("estufa/create/", EstufaCreateView.as_view(), name="estufa_create"),
     path("estufa/update/<int:pk>", EstufaUpdateView.as_view(), name="estufa_update"),
