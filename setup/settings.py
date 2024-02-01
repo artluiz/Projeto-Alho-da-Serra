@@ -91,12 +91,6 @@ DATABASES = {
         cast=db_url
     ),
     "secondary": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": "alho_recomendacao",
-        "USER": "alho_recomendacao",
-        "PASSWORD": "alh24luiz",
-        "HOST": "database2.caioerwlhlbp.us-east-1.rds.amazonaws.com",
-        "PORT": "5432",
     }
 }
 
