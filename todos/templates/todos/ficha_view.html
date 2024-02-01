@@ -128,7 +128,9 @@
         <h2>N ̊ da Recomendação: E{{ ficha.pk }}</h2>
       </div>
       <div class="data-operacao">
-        <h2>Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</h2>
+        <h2>
+          Data da Aplicação: 
+          <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span></h2>
       </div>
     </div>
   </div>
@@ -143,11 +145,9 @@
           </span>
         </p>
       </div>
-
+      <p href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</p>
       <div >
         <p>
-          Data da Aplicação: 
-          <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span>
         </p>
       </div>
     </div>
@@ -206,16 +206,16 @@
           <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.campo1 %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.campo2 %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.antiCamara %}Kg ou L{% endif %}</span>
         </td>
         <td>
-          <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.previsto %}Kg ou L{% endif %}</span>
         </td>
         <td>
           <span>{{ ficha.total|floatformat:2 }}</span>

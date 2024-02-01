@@ -2,6 +2,10 @@
 
 {% block page_title %} Histórico {% endblock page_title %}
 
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+    {% load static %}
 {% block content %}
   <style>
   th {
@@ -68,7 +72,7 @@
         <td>{{ ficha.data_criada }}</td>
         <td>{{ ficha.data_aplicada }}</td>
         <td>
-          <input type="checkbox" {% if ficha.pendente %}checked{% endif %} onclick="location.href='{% url 'ficha_toggle_pendente' pk=ficha.pk %}'">
+          <input type="checkbox" class="ativo-checkbox" data-item-id="{{ ficha.pk }}" {% if ficha.pendente %}checked{% endif %}>
         </td>
         <td>
           <a href="{% url 'ficha_update' pk=ficha.pk %}"
@@ -76,8 +80,8 @@
           >
             Editar
           </a>
-          <a href="{% url 'ficha_toggle_active' pk=ficha.pk %}" {% if  ficha.ativo %}class="btn btn-danger btn "{% else %}class="btn btn-success btn"{% endif %} 
-          >{% if ficha.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>
+          <input type="checkbox" class="btn-check" id="btn-check_{{ forloop.counter }}" data-item-id="{{ ficha.pk }}" {% if ficha.ativo %}checked{% endif %}>
+          <label class="btn btn-primary" for="btn-check_{{ forloop.counter }}">{% if ficha.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</label>
 
           <a href="{% url 'ficha_view' pk=ficha.pk %}"class="fa-solid fa-eye ms-4" style="text-decoration:none"></a>
         </td>
@@ -89,4 +93,64 @@
   <p>Não há fichas cadastradas</p>
   {% endif %}
   <a href="{% url "home_page"%}" class="btn btn-primary btn-lg"> Cadastrar Ficha</a>
+  
+  <script>
+    $(document).ready(function () {
+      $('.ativo-checkbox').on('change', function () {
+        var checkbox = $(this);
+        var fichaPk = checkbox.data('item-id');
+        var row = checkbox.closest('tr');  // Obtemos o elemento pai da checkbox (a linha da tabela)
+
+        $.ajax({
+          type: 'PUT',
+          url: '/ficha/toggle_p/' + fichaPk + '/',
+          data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+          dataType: 'json',
+          success: function (data) {
+            // Atualizar interface do usuário conforme necessário
+            console.log('Status: sucesso');
+            checkbox.prop('checked', data.pendente);
+
+            // Exemplo: Destacar a linha quando a checkbox é marcada
+            if (data.pendente) {
+                row.addClass('marked-row');
+            } else {
+                row.removeClass('marked-row');
+            }
+          },
+          error: function (data) {
+              console.log('Erro:', data);
+          }
+        });
+      });
+
+      $('.btn-check').on('change', function () {
+        var checkbox = $(this);
+        var fichaPk = checkbox.data('item-id');
+        var row = checkbox.closest('tr');  // Obtemos o elemento pai da checkbox (a linha da tabela)
+
+        $.ajax({
+          type: 'PUT',
+          url: '/ficha/toggle/' + fichaPk + '/',
+          data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+          dataType: 'json',
+          success: function (data) {
+            // Atualizar interface do usuário conforme necessário
+            console.log('Status: sucesso');
+            checkbox.prop('checked', data.ativo);
+
+            // Exemplo: Destacar a linha quando a checkbox é marcada
+            if (data.ativo) {
+                row.addClass('marked-row');
+            } else {
+                row.removeClass('marked-row');
+            }
+          },
+          error: function (data) {
+              console.log('Erro:', data);
+          }
+        });
+      });
+    });
+  </script>
   {% endblock content %}

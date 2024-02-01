@@ -194,9 +194,10 @@
                 <td>
                   <select id="listaProdutos" class="campo-selecao" required>
                   <option value="{{ ficha.produto|default:'' }}">{{ ficha.produto|default:'' }}</option>
+                  {% if ficha.produto %}<option value="" ></option>{% endif %}
                     {% for produto in produtos %}
                       {% if produto.ativo == 1 %}
-                        <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                        <option value={{ produto.produto }}>{{ produto.produto }} - ({{ produto.codigo }})</option>
                       {% endif %}
                     {% endfor %}
                   </select>

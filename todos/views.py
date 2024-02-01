@@ -6,20 +6,33 @@ from django.views.generic import (
     View,
     DetailView,
 )
+from django.shortcuts import redirect
 import pandas as pd
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.db.models import Max
 import pytz
 from datetime import datetime
 from django.utils import timezone
 import json
+from todos.routers import DatabaseSynchronizer, DatabaseDownloader
 
 from .models import Estufa, Atividade, Produtos, TipoIrrigador, FichaDeAplicacao
+from .forms import ItemForm
 
 from django.shortcuts import render
+
+
+def sync_db_view(request):
+    DatabaseSynchronizer.sync_db_atividade()
+    return HttpResponseRedirect(reverse("atividade_list"))
+
+
+def down_db_view(request):
+    DatabaseDownloader.sync_db_atividade()
+    return HttpResponseRedirect(reverse("atividade_list"))
 
 
 class FichaFiltro(ListView):
@@ -56,7 +69,7 @@ class FichaFiltro(ListView):
             elif status_filter == "false":
                 queryset = queryset.filter(pendente=True)
 
-        return queryset
+        return queryset.order_by("data_aplicada")
 
     def get_template_names(self):
         # Verifique a parte da URL para decidir qual template usar
@@ -86,10 +99,14 @@ def upload_excel_file(request):
                     # Lidar com dados faltantes, por exemplo, pulando a linha ou registrando um erro
                     continue
 
+                data_criada = timezone.now().astimezone(pytz.timezone("Europe/London"))
+
                 produto, created = Produtos.objects.get_or_create(codigo=produto_cod)
                 produto.produto = row["Produto"]
                 produto.codigo = row["Cód."]
                 produto.descricao = row["Descrição"]
+                produto.data_criada = data_criada
+                produto.data_atualizado = data_criada
                 produto.save()
 
             return HttpResponseRedirect(reverse("produtos_list"))
@@ -108,18 +125,30 @@ def estufa_toggle_active(request, pk):
     return redirect(reverse("estufa_list"))
 
 
+@csrf_exempt
 def ficha_toggle_active(request, pk):
-    ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
-    ficha.ativo = not ficha.ativo
-    ficha.save()
-    return redirect(reverse("ficha_list"))
+    obj = get_object_or_404(FichaDeAplicacao, pk=pk)
+
+    if request.method == "PUT" or request.method == "POST":
+        obj.data_atualizado = timezone.now().astimezone(pytz.timezone("Europe/London"))
+        obj.ativo = not obj.ativo
+        obj.save()
+        return JsonResponse({"ativo": obj.ativo})
+    else:
+        return JsonResponse({"error": "Invalid request"})
 
 
+@csrf_exempt
 def ficha_toggle_pendente(request, pk):
-    ficha = get_object_or_404(FichaDeAplicacao, pk=pk)
-    ficha.pendente = not ficha.pendente
-    ficha.save()
-    return redirect(reverse("ficha_list"))
+    obj = get_object_or_404(FichaDeAplicacao, pk=pk)
+
+    if request.method == "PUT" or request.method == "POST":
+        obj.data_atualizado = timezone.now().astimezone(pytz.timezone("Europe/London"))
+        obj.pendente = not obj.pendente
+        obj.save()
+        return JsonResponse({"ativo": obj.pendente})
+    else:
+        return JsonResponse({"error": "Invalid request"})
 
 
 def produto_toggle_active(request, pk):
@@ -134,7 +163,7 @@ def todo_home(request):
     if ficha_aplicacao_count is None:
         ficha_aplicacao_count = 1179
     else:
-        ficha_aplicacao_count += 1
+        ficha_aplicacao_count + 1
 
     estufas = Estufa.objects.all()
     atividades = Atividade.objects.all()
@@ -221,16 +250,16 @@ def receber_dados(request):
         irrigador_id = TipoIrrigador.objects.get(pk=(dados["irrigador_id"]))
         dados_tabela = dados["dados_tabela"]
         obs = dados["obs"]
-        data_criada = timezone.now().astimezone(pytz.timezone("America/Sao_Paulo"))
+        data_criada = timezone.now().astimezone(pytz.timezone("Europe/London"))
 
         # data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         data_aplicada = datetime.strptime(dados["data1"], "%Y-%m-%d")
 
-        # data_planejada = pytz.timezone("America/Sao_Paulo").localize(data_planejada)
-        data_aplicada = pytz.timezone("America/Sao_Paulo").localize(data_aplicada)
+        data_aplicada = pytz.timezone("Europe/London").localize(data_aplicada)
 
         # Crie uma nova instância do modelo FichaDeAplicacao e salve-a no banco de dados
         ficha_aplicacao = FichaDeAplicacao(
+            data_atualizado=data_criada,
             data_criada=data_criada,
             atividade=atividade_id,
             estufa=estufa_id,
@@ -241,7 +270,7 @@ def receber_dados(request):
             data_aplicada=data_aplicada,
             obs=obs,
         )
-        ficha_aplicacao.save()
+        ficha_aplicacao.save(using="secondary")
 
         return JsonResponse({"status": "success"}, safe=False)
     else:
@@ -270,11 +299,14 @@ def atualizar_dados(request):
         # ficha_aplicacao.data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         ficha_aplicacao.data_aplicada = datetime.strptime(dados["data"], "%Y-%m-%d")
 
-        # ficha_aplicacao.data_planejada = pytz.timezone("America/Sao_Paulo").localize(
+        # ficha_aplicacao.data_planejada = pytz.timezone("Europe/London").localize(
         #    ficha_aplicacao.data_planejada
         # )
-        ficha_aplicacao.data_aplicada = pytz.timezone("America/Sao_Paulo").localize(
+        ficha_aplicacao.data_aplicada = pytz.timezone("Europe/London").localize(
             ficha_aplicacao.data_aplicada
+        )
+        ficha_aplicacao.data_atualizado = timezone.now().astimezone(
+            pytz.timezone("Europe/London")
         )
 
         # Salve a instância para atualizar o banco de dados

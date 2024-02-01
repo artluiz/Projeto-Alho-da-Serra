@@ -68,45 +68,45 @@
     </thead>
     <tbody>
       {% for ficha in fichadeaplicacao_list %}
-        {% if ficha.ativo %}
-          <tr>
-              <th scope="row">E{{ ficha.pk }}</th>
-              <td>{{ ficha.data_aplicada }}</td>
-              <td>{{ ficha.atividade.nome }}</td>
-              <td>{{ ficha.irrigador.nome_tipo }}</td>
-              <td>{{ ficha.estufa.nome_estufa }}</td>
-              <td>
-                <ul class="ul_first">
-                {% for ficha in ficha.dados %}
-                  <li>
-                    <span class="campo-selecao"> {{ ficha.produto|default:''|safe }} </span>
-                  </li>
-                {% endfor %}
-                </ul>
-              </td>
-              <td>
-                <ul>
-                {% for ficha in ficha.dados %}
-                  <li>
-                    <span>{{ ficha.dose|floatformat:2|default:''|safe }}</span>
-                  </li>
-                {% endfor %}
-                </ul>
-              </td>
-              <td>
-                <ul>
-                {% for ficha in ficha.dados %}
-                  <li>
-                    <span>{{ ficha.previsto|floatformat:2|default:''|safe }}</span>
-                  </li>
-                {% endfor %}
-                </ul>
-              </td>
-              <!--<a href="{% url 'ficha_toggle_active' pk=ficha.pk %}" {% if  ficha.ativo %}class="btn btn-danger btn "{% else %}class="btn btn-success btn"{% endif %} 
-              >{% if ficha.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>-->
-          </tr>
-        {% endif %}
-      {% endfor %}
+    {% if ficha.ativo %}
+      <tr>
+        <th scope="row">E{{ ficha.pk }}</th>
+        <td>{{ ficha.data_aplicada }}</td>
+        <td>{{ ficha.atividade.nome }}</td>
+        <td>{{ ficha.irrigador.nome_tipo }}</td>
+        <td>{{ ficha.estufa.nome_estufa }}</td>
+        <td>
+          <ul class="ul_first">
+            {% for item in ficha.dados %}
+              <li>
+                <span class="campo-selecao"> {{ item.produto|default:''|safe }} </span>
+              </li>
+            {% endfor %}
+          </ul>
+        </td>
+        <td>
+          <ul>
+            {% for item in ficha.dados %}
+              <li>
+                <span>{{ item.dose|floatformat:2|default:''|safe }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </td>
+        <td>
+          <ul>
+            {% for item in ficha.dados %}
+              <li>
+                <span>{{ item.previsto|floatformat:2|default:''|safe }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </td>
+        <!--<a href="{% url 'ficha_toggle_active' pk=ficha.pk %}" {% if  ficha.ativo %}class="btn btn-danger btn "{% else %}class="btn btn-success btn"{% endif %} 
+        >{% if ficha.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>-->
+      </tr>
+    {% endif %}
+  {% endfor %}
     </tbody>
   </table>
   {% else %}

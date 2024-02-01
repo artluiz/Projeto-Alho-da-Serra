@@ -1,5 +1,5 @@
 {% extends "base.html" %} {% load static %}
-{% block content %} {% load tz %} 
+{% block content %} {% load tz %} {% load my_filters %}
     <style>
       /* Exemplo de estilo básico, personalize conforme necessário */
       body {
@@ -194,9 +194,10 @@
               <td>
                 <select id="listaProdutos" class="campo-selecao">
                   <option value="{{ ficha.produto|default:'' }}">{{ ficha.produto|default:'' }}</option>
+                  {% if ficha.produto %}<option value="" ></option>{% endif %}
                   {% for produto in produtos %}
                     {% if produto.ativo == 1 %}
-                      <option value={{ produto.produto }}>{{ produto.produto }}</option>
+                      <option value={{ produto.produto }}>{{ produto.produto }} - ({{ produto.codigo }})</option>
                     {% endif %}
                   {% endfor %}
                 </select>
@@ -290,49 +291,62 @@
           camposDinamicos.forEach(function (campo) {
             // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
             var indice = campo.id.split('_')[1];
-            if(document.getElementById('dose_' + indice).value){
-
             var dose = parseFloat(document.getElementById('dose_' + indice).value.replace(',', '.'));
 
-            var valorCampo1 = (area * dose)/2; //exemplo de cálculo
-            var valorCampo2 = (area * dose)/2;
-            var previsto = area * dose;
+            if(!dose){
+              campo.value = ""; // limita para 2 casas decimais
+              document.getElementById('campo2_' + indice).value = "";
+              document.getElementById('anti_camara_' + indice).value = "";
+              document.getElementById('previsto_' + indice).value = "";
+            }else{
+              if(document.getElementById('dose_' + indice).value){
 
-            // Atualize os campos de entrada com os valores calculados
-            /*campo.value = valorCampo1;
-            document.getElementById('campo2_' + indice).value = valorCampo2;
-            document.getElementById('anti_camara_' + indice).value = "-";
-            document.getElementById('previsto_' + indice).value = previsto;*/
+              var valorCampo1 = (area * dose)/2; //exemplo de cálculo
+              var valorCampo2 = (area * dose)/2;
+              var previsto = area * dose;
 
-            campo.value = parseFloat(valorCampo1).toFixed(2); // limita para 2 casas decimais
-            document.getElementById('campo2_' + indice).value = parseFloat(valorCampo2).toFixed(2);
-            document.getElementById('anti_camara_' + indice).value = "-";
-            
-            var valorCampo1Num = parseFloat(valorCampo1.toFixed(2));
-            var valorCampo2Num = parseFloat(valorCampo2.toFixed(2));
-            document.getElementById('previsto_' + indice).value = (valorCampo1Num + valorCampo2Num).toFixed(2);
+              // Atualize os campos de entrada com os valores calculados
+              /*campo.value = valorCampo1;
+              document.getElementById('campo2_' + indice).value = valorCampo2;
+              document.getElementById('anti_camara_' + indice).value = "-";
+              document.getElementById('previsto_' + indice).value = previsto;*/
 
+              campo.value = parseFloat(valorCampo1).toFixed(2); // limita para 2 casas decimais
+              document.getElementById('campo2_' + indice).value = parseFloat(valorCampo2).toFixed(2);
+              document.getElementById('anti_camara_' + indice).value = "-";
+              
+              var valorCampo1Num = parseFloat(valorCampo1.toFixed(2));
+              var valorCampo2Num = parseFloat(valorCampo2.toFixed(2));
+              document.getElementById('previsto_' + indice).value = (valorCampo1Num + valorCampo2Num).toFixed(2);
+
+              }
             }
+            
           });
         } else {
           camposDinamicos.forEach(function (campo) {
             // Extraia o índice do ID (por exemplo, campo1_1, campo1_2, etc.)
             var indice = campo.id.split('_')[1];
-            if(document.getElementById('dose_' + indice).value){
-
             var dose = parseFloat(document.getElementById('dose_' + indice).value.replace(',', '.'));
-            var valorAntiCamara = area * dose;  // Exemplo de cálculo para anti_camara
+            if(!dose){
+              campo.value = ""; // limita para 2 casas decimais
+              document.getElementById('campo2_' + indice).value = "";
+              document.getElementById('anti_camara_' + indice).value = "";
+              document.getElementById('previsto_' + indice).value = "";
+            }else{
+              if(document.getElementById('dose_' + indice).value){
+              var valorAntiCamara = area * dose;  // Exemplo de cálculo para anti_camara
 
-            // Atualize o campo anti_camara com o valor calculado
-            document.getElementById('anti_camara_' + indice).value = parseFloat(valorAntiCamara).toFixed(2);
-            document.getElementById('previsto_' + indice).value = parseFloat(valorAntiCamara).toFixed(2);
-            campo.value = '-';
-            document.getElementById('campo2_' + indice).value = '-';
+              // Atualize o campo anti_camara com o valor calculado
+              document.getElementById('anti_camara_' + indice).value = parseFloat(valorAntiCamara).toFixed(2);
+              document.getElementById('previsto_' + indice).value = parseFloat(valorAntiCamara).toFixed(2);
+              campo.value = '-';
+              document.getElementById('campo2_' + indice).value = '-';
 
+              }
             }
           });
         }
-        
       }
     });
     </script>

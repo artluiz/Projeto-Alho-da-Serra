@@ -3,6 +3,14 @@ from django.db import models
 
 # Create your models here.
 class Estufa(models.Model):
+    data_criada = models.DateTimeField(
+        verbose_name="Data de criação", blank=False, auto_now=False, auto_now_add=True
+    )
+    data_atualizado = models.DateTimeField(
+        verbose_name="Data da aplicação",
+        auto_now=True,
+        auto_now_add=False,
+    )
     nome_estufa = models.CharField(
         verbose_name="Estufa", max_length=50, null=False, blank=False
     )
@@ -14,6 +22,14 @@ class Estufa(models.Model):
 
 
 class Atividade(models.Model):
+    data_criada = models.DateTimeField(
+        verbose_name="Data de criação", blank=False, auto_now=False
+    )
+    data_atualizado = models.DateTimeField(
+        verbose_name="Data da aplicação",
+        auto_now=True,
+        auto_now_add=False,
+    )
     nome = models.CharField(
         verbose_name="Atividade", max_length=10, null=False, blank=False
     )
@@ -24,6 +40,14 @@ class Atividade(models.Model):
 
 
 class Produtos(models.Model):
+    data_criada = models.DateTimeField(
+        verbose_name="Data de criação", blank=False, auto_now=False
+    )
+    data_atualizado = models.DateTimeField(
+        verbose_name="Data da aplicação",
+        auto_now=True,
+        auto_now_add=False,
+    )
     produto = models.CharField(
         verbose_name="Produto", max_length=50, null=False, blank=False
     )
@@ -45,10 +69,9 @@ class FichaDeAplicacao(models.Model):
     data_criada = models.DateTimeField(
         verbose_name="Data de criação", blank=False, auto_now=False
     )
-    data_atualizado = models.DateField(
+    data_atualizado = models.DateTimeField(
         verbose_name="Data da aplicação",
-        null=True,
-        auto_now=False,
+        auto_now=True,
         auto_now_add=False,
     )
     data_aplicada = models.DateField(

@@ -136,7 +136,9 @@
         <h2>N ̊ da Recomendação: E{{ ficha.pk }}</h2>
       </div>
       <div class="data-operacao">
-        <h2>Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i"  }}</h2>
+        <h2>
+          Data da Aplicação: 
+          <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span></h2>
       </div>
     </div>
   </div>
@@ -154,8 +156,7 @@
 
       <div >
         <p>
-          Data da Aplicação: 
-          <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span>
+      <p href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</p>
         </p>
       </div>
     </div>

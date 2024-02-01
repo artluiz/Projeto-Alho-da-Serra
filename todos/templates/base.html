@@ -16,6 +16,7 @@
     {% bootstrap_javascript %}
     {% load static %}
     <script src="{% static 'js/jquery-3.7.1.slim.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{% block page_title %}{% endblock page_title %}</title>
@@ -31,6 +32,8 @@
         <a class="navbar-brand" href="{% url "irrigador_list"%}">Irrigadores</a>
         <a class="navbar-brand" href="{% url "produtos_list"%}">Produtos</a>
         <a class="navbar-brand" href="{% url "atividade_list"%}">Atividades</a>
+        <a class="navbar-brand" href="{% url "down_db_view"%}">Baixar</a>
+        <a class="navbar-brand" href="{% url "sync_db_view"%}">Sincronizar</a>
       </div>
     </nav>
     <main class="container-fluid">{% block content %}{% endblock content %}</main>

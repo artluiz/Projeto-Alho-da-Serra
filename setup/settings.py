@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "todos.apps",
-    'bootstrap5',
+    "bootstrap5",
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -89,12 +89,18 @@ DATABASES = {
         "DATABASE_URL", 
         default=f"sqlite:///{BASE_DIR / "db.sqlite3"}", 
         cast=db_url
-    )
-    #'default': {
-    #    'ENGINE': 'django.db.backends.sqlite3',
-    #    'NAME': BASE_DIR / 'db.sqlite3',
-    # }
+    ),
+    "secondary": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "alho_recomendacao",
+        "USER": "alho_recomendacao",
+        "PASSWORD": "alh24luiz",
+        "HOST": "database2.caioerwlhlbp.us-east-1.rds.amazonaws.com",
+        "PORT": "5432",
+    }
 }
+
+DATABASE_ROUTERS = ['todos.routers.FichaDeAplicacaoRouter']
 
 
 # Password validation

@@ -28,6 +28,8 @@ from todos.views import (
     ProdutosUpdateView,
     ProdutosDeleteView,
     TipoIrrigadorListView,
+    sync_db_view,
+    down_db_view,
 )
 
 urlpatterns = [
@@ -35,9 +37,11 @@ urlpatterns = [
     path("", todo_home, name="home_page"),
     path("ficha/toggle/<int:pk>", ficha_toggle_active, name="ficha_toggle_active"),
     path(
-        "ficha/toggle_p/<int:pk>", ficha_toggle_pendente, name="ficha_toggle_pendente"
+        "ficha/toggle_p/<int:pk>/", ficha_toggle_pendente, name="ficha_toggle_pendente"
     ),
     path("upload_excel/", upload_excel_file, name="upload_excel"),
+    path("sync/", sync_db_view, name="sync_db_view"),
+    path("down/", down_db_view, name="down_db_view"),
     path("ficha/view/<int:pk>/", FichaView, name="ficha_view"),
     path("ficha/imprimir/<int:pk>/", ImprimirFicha, name="imprimir_ficha"),
     path("update/<int:pk>", todo_update, name="ficha_update"),
