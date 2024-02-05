@@ -365,7 +365,7 @@
             var linha = $(this);
 
             // Colete os valores dos campos na linha atual
-            var produto = linha.find('select').val();
+            var produto = linha.find('select option:selected').text();
             var dose = parseFloat(linha.find('input[id^="dose_"]').val().replace(',', '.'));
             var campo1 = linha.find('input[id^="campo1_"]').val();
             var campo2 = linha.find('input[id^="campo2_"]').val();

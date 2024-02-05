@@ -1,0 +1,81 @@
+{% extends "base.html" %} {% load crispy_forms_tags %}
+
+{% block page_title %} Relatório {% endblock page_title %}
+
+{% block content %}
+  <style>
+  th {
+    text-align: center;
+  }
+  td {
+    text-align: center;
+  }
+  ul {
+    list-style: none;
+  }
+  .ul_first{
+    list-style: number;
+    text-align: left;
+  }
+  </style>
+  <script src="https://kit.fontawesome.com/ae773d5972.js" crossorigin="anonymous"></script>
+  <form method="get" action="{% url 'ficha_filtro_prod' %}" class="form-inline mt-3" fixed-form>
+    <div class="d-flex">
+      <div class="input-group input-group-lg">
+        <label class="input-group-text" id="basic-addon1" for="start_date" style="min-width: 210px; max-width: 250px;">Data de início:</label>
+        <input type="date" id="start_date" name="start_date" class="form-control" style="max-width: 500px;">
+
+        <label class="input-group-text" id="basic-addon2" for="end_date" style="min-width: 210px; max-width: 250px;">Data de término:</label>
+        <input type="date" id="end_date" name="end_date" class="form-control" style="max-width: 500px;">
+        
+        <label class="input-group-text" id="basic-addon1" for="atividade_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Atividade:</label>
+        <select id="atividade_filter" name="atividade_filter" class="form-control" style="max-width: 500px;">
+            <option value="" selected>Selecione uma Atividade</option>
+            {% for atividade in atividades %}
+                <option value="{{ atividade.id }}">{{ atividade.nome }}</option>
+            {% endfor %}
+        </select>
+        
+        <label class="input-group-text" id="basic-addon1" for="estufa_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Estufa:</label>
+        <select id="estufa_filter" name="estufa_filter" class="form-control" style="max-width: 500px;">
+            <option value="" selected>Selecione uma Estufa</option>
+            {% for estufa in estufas %}
+                <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
+            {% endfor %}
+        </select>
+      <label class="input-group-text" id="basic-addon1" for="status_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Status:</label>
+        <select class="form-select" id="status_filter"  name="status_filter" style="max-width: 500px;">
+            <option value="" selected>Selecione um Status</option>
+            <option value="true" {% if request.GET.status_filter == 'true' %}selected{% endif %}>Pendente</option>
+            <option value="false" {% if request.GET.status_filter == 'false' %}selected{% endif %}>Concluída</option>
+        </select>
+        <button type="submit" class="btn btn-primary btn" >Filtrar</button>
+      </div>
+    </div>
+  </form>
+  {% if fichadeaplicacao_relatorio_prod %}
+  <table class="table fs-5  mt-3">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" style="text-align: left">Produto</th>
+        <th scope="col" style="text-align: left">Consumo Previsto(Kg ou L)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for produto, previsto in dados_estruturados.items %}
+       {% with numero_parenteses=produto|slice:"-5:-1"|cut:"("|cut:")"|cut:" " %}
+          <tr>
+              <th scope="row">E{{ numero_parenteses }}</th>
+              <td style="text-align: left">{{ produto }}</td>
+              <td style="text-align: left">{{ previsto|floatformat:2  }}</td>
+          </tr>
+        {% endwith %}
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Não há fichas cadastradas</p>
+  {% endif %}
+  <a href="{% url "ficha_list"%}" class="btn btn-primary btn-lg"> Voltar</a>
+  {% endblock content %}

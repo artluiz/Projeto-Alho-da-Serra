@@ -3,40 +3,83 @@
 {% block page_title %} Estufas {% endblock page_title %}
 
 {% block content %}
-    {% if estufa_list %}
-    <table class="table fs-5">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Nome Estufa</th>
-          <th scope="col">Área</th>
-          <th scope="col">Fazenda</th>
-          <th scope="col">Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for estufa in estufa_list %}
-        <tr>
-          <th scope="row">{{ estufa.pk }}</th>
-          <td>{{ estufa.nome_estufa }}</td>
-          <td>{{ estufa.area }}</td>
-          <td>{{ estufa.fazenda }}</td>
-          <td>
-            <a href="{% url 'estufa_update' pk=estufa.pk %}"
-               class="btn btn-secondary btn {% if estufa.data_aplicada %}disabled{% endif %}"
-            >
+    <style>
+      th {
+        text-align: center;
+      }
+      td {
+        text-align: center;
+      }
+    </style>
+  {% if estufa_list %}
+  <table class="table fs-5">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" style="text-align: left">Nome Estufa</th>
+        <th scope="col">Área</th>
+        <th scope="col" style="text-align: left">Fazenda</th>
+        <th scope="col">Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for estufa in estufa_list %}
+      <tr>
+        <th scope="row">{{ estufa.pk }}</th>
+        <td style="text-align: left">{{ estufa.nome_estufa }}</td>
+        <td>{{ estufa.area }}</td>
+        <td style="text-align: left">{{ estufa.fazenda }}</td>
+        <td>
+          <label for="btn-edit_{{ forloop.counter }}" class="btn btn-secondary">
               Editar
-            </a>
-            <a href="{% url 'estufa_toggle_active' pk=estufa.pk %}" {% if  estufa.ativo %}class="btn btn-danger btn"{% else %}class="btn btn-success btn"{% endif %} 
-            >{% if estufa.ativo %} Finalizar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <p>Não há tarefas cadastradas</p>
-    {% endif %}
-    <a href="{% url "estufa_create"%}" class="btn btn-primary btn-lg"> Cadastrar Estufa</a>
-    {% endblock content %}
+              <input type="button" onclick="location.href='{% url 'estufa_update' pk=estufa.pk %}';" id="btn-edit_{{ forloop.counter }}" style="display: none;">
+          </label>
+
+          <input type="checkbox" class="btn-check" id="btn-check_{{ forloop.counter }}" data-item-id="{{ estufa.pk }}" {% if estufa.ativo %}checked{% endif %}>
+          <label class="btn {% if estufa.ativo %}btn-danger{% else %}btn-success{% endif %}" id="btn-label_{{ estufa.pk }}" for="btn-check_{{ forloop.counter }}">{% if estufa.ativo %} Cancelar {% else %}Ativar{% endif %}</label>
+        
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>Não há tarefas cadastradas</p>
+  {% endif %}
+  <a href="{% url "estufa_create"%}" class="btn btn-primary btn-lg"> Cadastrar Estufa</a>
+
+  <script>
+    $(document).ready(function () {
+      $('.btn-check').change(function() {
+        var checkbox = $(this);
+        var pk = checkbox.data('item-id');
+        var label = $("#btn-label_" + pk);  // Obtemos o elemento label correspondente
+
+        $.ajax({
+          url: '/estufa/toggle/' + pk,
+          type: 'post',
+          data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+          dataType: 'json',
+          success: function (data) {
+            // Atualizar interface do usuário conforme necessário
+            console.log('Status: sucesso');
+            checkbox.prop('checked', data.ativo);
+
+            // Alterar a cor do botão
+            if (data.ativo) {
+              label.removeClass('btn-success').addClass('btn-danger');
+              label.text(' Cancelar ');
+            } else {
+              label.removeClass('btn-danger').addClass('btn-success');
+              label.text('Ativar');
+            }
+          },
+          error: function (data) {
+            console.log('Erro:', data);
+          }
+        });
+      });
+    });
+  </script>
+  {% endblock content %}
     

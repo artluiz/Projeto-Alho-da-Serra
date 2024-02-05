@@ -2,10 +2,6 @@
 
 {% block page_title %} Histórico {% endblock page_title %}
 
-    {% load bootstrap5 %}
-    {% bootstrap_css %}
-    {% bootstrap_javascript %}
-    {% load static %}
 {% block content %}
   <style>
   th {
@@ -15,12 +11,15 @@
     text-align: center;
   }
   </style>
-  <script src="https://kit.fontawesome.com/ae773d5972.js" crossorigin="anonymous"></script>
+
   <form method="get" action="{% url 'ficha_filtro' %}" class="form-inline mt-3" fixed-form>
     <div class="d-flex">
       <div class="input-group input-group-lg">
-        <label class="input-group-text" id="basic-addon1" for="data_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Data:</label>
-        <input type="date" id="data_filter" name="data_filter" class="form-control" style="max-width: 500px;">
+        <label class="input-group-text" id="basic-addon1" for="start_date" style="min-width: 210px; max-width: 250px;">Data de início:</label>
+        <input type="date" id="start_date" name="start_date" class="form-control" style="max-width: 500px;">
+
+        <label class="input-group-text" id="basic-addon2" for="end_date" style="min-width: 210px; max-width: 250px;">Data de término:</label>
+        <input type="date" id="end_date" name="end_date" class="form-control" style="max-width: 500px;">
         
         <label class="input-group-text" id="basic-addon1" for="atividade_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Atividade:</label>
         <select id="atividade_filter" name="atividade_filter" class="form-control" style="max-width: 500px;">
@@ -44,10 +43,21 @@
             <option value="false" {% if request.GET.status_filter == 'false' %}selected{% endif %}>Concluída</option>
         </select>
         <button type="submit" class="btn btn-primary btn" >Filtrar</button>
-        <button type="submit" class="btn btn-secondary btn" formaction="{% url 'ficha_filtro_relatorio' %}">Relatório</button>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            Relatório
+          </button>
+          <div class="dropdown-menu">
+            <button type="submit" class="dropdown-item" formaction="{% url 'ficha_filtro_relatorio' %}">Padrão</button>
+            <button type="submit" class="dropdown-item" formaction="{% url 'ficha_filtro_prod' %}">Produto</button>
+          </div>
+        </div>
+        
       </div>
     </div>
   </form>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+
   {% if fichadeaplicacao_list %}
   <table class="table fs-5  mt-3">
     <thead>
@@ -75,15 +85,14 @@
           <input type="checkbox" class="ativo-checkbox" data-item-id="{{ ficha.pk }}" {% if ficha.pendente %}checked{% endif %}>
         </td>
         <td>
-          <a href="{% url 'ficha_update' pk=ficha.pk %}"
-              class="btn btn-secondary btn {% if ficha.data_aplicada %}{% endif %} me-2"
-          >
-            Editar
-          </a>
+          <label for="btn-edit_{{ forloop.counter }}" class="btn btn-secondary">
+              Editar
+              <input type="button" onclick="location.href='{% url 'ficha_update' pk=ficha.pk %}';" id="btn-edit_{{ forloop.counter }}" style="display: none;">
+          </label>
           <input type="checkbox" class="btn-check" id="btn-check_{{ forloop.counter }}" data-item-id="{{ ficha.pk }}" {% if ficha.ativo %}checked{% endif %}>
-          <label class="btn btn-primary" for="btn-check_{{ forloop.counter }}">{% if ficha.ativo %} Cancelar {% else %}&nbsp;&nbsp;Ativar&nbsp;&nbsp;{% endif %}</label>
-
-          <a href="{% url 'ficha_view' pk=ficha.pk %}"class="fa-solid fa-eye ms-4" style="text-decoration:none"></a>
+          <label class="btn {% if ficha.ativo %}btn-danger{% else %}btn-success{% endif %}" id="btn-label_{{ ficha.pk }}" for="btn-check_{{ forloop.counter }}">{% if ficha.ativo %} Cancelar {% else %}Ativar{% endif %}</label>
+          
+          <a href="{% url 'ficha_view' pk=ficha.pk %}"class="fa fa-eye ms-4" style="text-decoration:none"></a>
         </td>
       </tr>
       {% endfor %}
@@ -124,14 +133,14 @@
         });
       });
 
-      $('.btn-check').on('change', function () {
+      $('.btn-check').change(function() {
         var checkbox = $(this);
-        var fichaPk = checkbox.data('item-id');
-        var row = checkbox.closest('tr');  // Obtemos o elemento pai da checkbox (a linha da tabela)
+        var pk = checkbox.data('item-id');
+        var label = $("#btn-label_" + pk);  // Obtemos o elemento label correspondente
 
         $.ajax({
-          type: 'PUT',
-          url: '/ficha/toggle/' + fichaPk + '/',
+          url: '/ficha/toggle/' + pk,
+          type: 'post',
           data: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
           dataType: 'json',
           success: function (data) {
@@ -139,15 +148,17 @@
             console.log('Status: sucesso');
             checkbox.prop('checked', data.ativo);
 
-            // Exemplo: Destacar a linha quando a checkbox é marcada
+            // Alterar a cor do botão
             if (data.ativo) {
-                row.addClass('marked-row');
+              label.removeClass('btn-success').addClass('btn-danger');
+              label.text(' Cancelar ');
             } else {
-                row.removeClass('marked-row');
+              label.removeClass('btn-danger').addClass('btn-success');
+              label.text('Ativar');
             }
           },
           error: function (data) {
-              console.log('Erro:', data);
+            console.log('Erro:', data);
           }
         });
       });

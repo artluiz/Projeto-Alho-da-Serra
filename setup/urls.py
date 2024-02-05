@@ -14,6 +14,8 @@ from todos.views import (
     upload_excel_file,
     FichaFiltro,
     FichaListView,
+    FichaRelatorioProduto,
+    FichaFiltroProduto,
     ImprimirFicha,
     EstufaListView,
     EstufaCreateView,
@@ -49,10 +51,20 @@ urlpatterns = [
     path("receber_dados/", receber_dados, name="receber_dados"),
     path("atualizar_dados/", atualizar_dados, name="atualizar_dados"),
     path("ficha/", FichaListView.as_view(), name="ficha_list"),
+    path(
+        "ficha/relatoriop",
+        FichaRelatorioProduto.as_view(),
+        name="ficha_relatorio_produto",
+    ),
     path("ficha/relatorio/", FichaListView.as_view(), name="ficha_relatorio"),
     path("ficha_filtro/", FichaFiltro.as_view(), name="ficha_filtro"),
     path(
         "ficha_filtro/relatorio/", FichaFiltro.as_view(), name="ficha_filtro_relatorio"
+    ),
+    path(
+        "ficha_filtro/relatorio_prod/",
+        FichaFiltroProduto.as_view(),
+        name="ficha_filtro_prod",
     ),
     path("estufa", EstufaListView.as_view(), name="estufa_list"),
     path("estufa/create/", EstufaCreateView.as_view(), name="estufa_create"),

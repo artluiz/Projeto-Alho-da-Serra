@@ -18,6 +18,7 @@ from datetime import datetime
 from django.utils import timezone
 import json
 from todos.routers import DatabaseSynchronizer, DatabaseDownloader
+from collections import defaultdict
 
 from .models import Estufa, Atividade, Produtos, TipoIrrigador, FichaDeAplicacao
 from .forms import ItemForm
@@ -26,13 +27,58 @@ from django.shortcuts import render
 
 
 def sync_db_view(request):
+    DatabaseSynchronizer.sync_db_estufa()
+    DatabaseSynchronizer.sync_db_produto()
     DatabaseSynchronizer.sync_db_atividade()
-    return HttpResponseRedirect(reverse("atividade_list"))
+    DatabaseSynchronizer.sync_db()
+    return HttpResponseRedirect(reverse("ficha_list"))
 
 
 def down_db_view(request):
+    DatabaseDownloader.sync_db_estufa()
+    DatabaseDownloader.sync_db_produto()
     DatabaseDownloader.sync_db_atividade()
-    return HttpResponseRedirect(reverse("atividade_list"))
+    DatabaseDownloader.sync_db()
+    return HttpResponseRedirect(reverse("ficha_list"))
+
+
+from collections import defaultdict
+
+
+class FichaRelatorioProduto(ListView):
+    model = FichaDeAplicacao
+    template_name = "fichadeaplicacao_relatorio_prod.html"
+
+    def get_queryset(self):
+        return FichaDeAplicacao.objects.all().order_by("id")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["estufas"] = Estufa.objects.all()
+        context["atividades"] = Atividade.objects.all()
+        context["tipo_irrigadores"] = TipoIrrigador.objects.all()
+
+        # Processar os dados do queryset para estrutura desejada
+        dados_estruturados = defaultdict(
+            float
+        )  # Dicionário padrão para armazenar previstos por produto
+
+        for ficha in self.get_queryset():
+            if ficha.ativo:
+                dados_json_lista = (
+                    ficha.dados
+                )  # Não é necessário usar .get() para listas
+                for item in dados_json_lista:
+                    if "produto" in item and "previsto" in item:
+                        # Adiciona ou soma previsto ao produto na estrutura
+                        if item["previsto"] != "":
+                            previsto = float(item["previsto"])
+                            dados_estruturados[item["produto"]] += previsto
+
+        # Convertendo o defaultdict para um dicionário regular
+        context["dados_estruturados"] = dict(dados_estruturados)
+
+        return context
 
 
 class FichaFiltro(ListView):
@@ -49,13 +95,17 @@ class FichaFiltro(ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
 
-        data_filter = self.request.GET.get("data_filter")
         atividade_filter = self.request.GET.get("atividade_filter")
         estufa_filter = self.request.GET.get("estufa_filter")
         status_filter = self.request.GET.get("status_filter")
+        start_date = self.request.GET.get("start_date")
+        end_date = self.request.GET.get("end_date")
 
-        if data_filter:
-            queryset = queryset.filter(data_criada__date=data_filter)
+        if start_date and end_date:
+            queryset = queryset.filter(data_criada__range=(start_date, end_date))
+        else:
+            if start_date:
+                queryset = queryset.filter(data_criada__date=start_date)
 
         if atividade_filter:
             queryset = queryset.filter(atividade__id=atividade_filter)
@@ -76,6 +126,72 @@ class FichaFiltro(ListView):
         if "relatorio" in self.request.path:
             return ["fichadeaplicacao_relatorio.html"]
         return ["fichadeaplicacao_list.html"]
+
+
+from collections import defaultdict
+
+
+class FichaFiltroProduto(ListView):
+    model = FichaDeAplicacao
+    context_object_name = "fichadeaplicacao_relatorio_prod"
+    template_name = "fichadeaplicacao_relatorio_prod.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["estufas"] = Estufa.objects.all()
+        context["atividades"] = Atividade.objects.all()
+        context["tipo_irrigadores"] = TipoIrrigador.objects.all()
+
+        queryset = self.get_queryset()
+
+        # Estruturação dos dados
+        dados_estruturados = defaultdict(float)
+
+        for ficha in queryset:
+            if ficha.ativo:
+                dados_json_lista = (
+                    ficha.dados
+                )  # Não é necessário usar .get() para listas
+                for item in dados_json_lista:
+                    if "produto" in item and "previsto" in item:
+                        # Adiciona ou soma previsto ao produto na estrutura
+                        if item["previsto"] != "":
+                            previsto = float(item["previsto"])
+                            dados_estruturados[item["produto"]] += previsto
+
+        # Convertendo o defaultdict para um dicionário regular
+        context["dados_estruturados"] = dict(dados_estruturados)
+
+        return context
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        atividade_filter = self.request.GET.get("atividade_filter")
+        estufa_filter = self.request.GET.get("estufa_filter")
+        status_filter = self.request.GET.get("status_filter")
+        start_date = self.request.GET.get("start_date")
+        end_date = self.request.GET.get("end_date")
+
+        if start_date and end_date:
+            queryset = queryset.filter(data_criada__range=(start_date, end_date))
+        else:
+            if start_date:
+                queryset = queryset.filter(data_criada__date=start_date)
+
+        if atividade_filter:
+            queryset = queryset.filter(atividade__id=atividade_filter)
+
+        if estufa_filter:
+            queryset = queryset.filter(estufa__id=estufa_filter)
+
+        if status_filter is not None:
+            if status_filter == "true":
+                queryset = queryset.filter(pendente=False)
+            elif status_filter == "false":
+                queryset = queryset.filter(pendente=True)
+
+        return queryset
 
 
 def upload_excel_file(request):
@@ -118,11 +234,17 @@ def upload_excel_file(request):
         pass
 
 
+@csrf_exempt
 def estufa_toggle_active(request, pk):
-    estufa = get_object_or_404(Estufa, pk=pk)
-    estufa.ativo = not estufa.ativo
-    estufa.save()
-    return redirect(reverse("estufa_list"))
+    obj = get_object_or_404(Estufa, pk=pk)
+
+    if request.method == "PUT" or request.method == "POST":
+        obj.data_atualizado = timezone.now().astimezone(pytz.timezone("Europe/London"))
+        obj.ativo = not obj.ativo
+        obj.save()
+        return JsonResponse({"ativo": obj.ativo})
+    else:
+        return JsonResponse({"error": "Invalid request"})
 
 
 @csrf_exempt
@@ -140,6 +262,7 @@ def ficha_toggle_active(request, pk):
 
 @csrf_exempt
 def ficha_toggle_pendente(request, pk):
+    print("obj")
     obj = get_object_or_404(FichaDeAplicacao, pk=pk)
 
     if request.method == "PUT" or request.method == "POST":
@@ -151,11 +274,18 @@ def ficha_toggle_pendente(request, pk):
         return JsonResponse({"error": "Invalid request"})
 
 
+@csrf_exempt
 def produto_toggle_active(request, pk):
-    produto = get_object_or_404(Produtos, pk=pk)
-    produto.ativo = not produto.ativo
-    produto.save()
-    return redirect(reverse("produtos_list"))
+    print("obj")
+    obj = get_object_or_404(Produtos, pk=pk)
+
+    if request.method == "PUT" or request.method == "POST":
+        obj.data_atualizado = timezone.now().astimezone(pytz.timezone("Europe/London"))
+        obj.ativo = not obj.ativo
+        obj.save()
+        return JsonResponse({"ativo": obj.ativo})
+    else:
+        return JsonResponse({"error": "Invalid request"})
 
 
 def todo_home(request):

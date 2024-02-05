@@ -144,7 +144,6 @@ class DatabaseSynchronizer:
                 ficha_data_criada = ficha_data_criada_utc.astimezone(
                     timezone.get_default_timezone()
                 ).replace(tzinfo=timezone.get_default_timezone())
-
                 if (
                     not latest_date_in_database
                     or ficha_data_criada > latest_date_in_database
@@ -153,8 +152,7 @@ class DatabaseSynchronizer:
                     codigo = row[1] if row[1] is not None else 0
                     descricao = row[2] if row[2] is not None else ""
                     ativo = row[3] if row[3] is not None else ""
-
-                    Produtos.objects.using("default").create(
+                    Produtos.objects.using("secondary").create(
                         data_criada=ficha_data_criada,
                         data_atualizado=row[5],
                         produto=produto,
