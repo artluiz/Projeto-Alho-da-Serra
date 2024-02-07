@@ -189,7 +189,7 @@
                     <option value=""></option>
                     {% for produto in produtos %}
                       {% if produto.ativo == 1 %}
-                        <option value={{ produto.produto }}>{{ produto.produto }} - ({{ produto.codigo }})</option>
+                        <option value={{ produto.codigo }}>{{ produto.produto }} - ({{ produto.codigo }})</option>
                       {% endif %}
                     {% endfor %}
                   </select>
@@ -345,7 +345,7 @@
             var linha = $(this);
 
             // Colete os valores dos campos na linha atual
-            var produto = linha.find('select option:selected').text();
+            var produto = linha.find('select option:selected').val();
             var dose = parseFloat(linha.find('input[id^="dose_"]').val().replace(',', '.'));
             console.log(dose);
             var campo1 = linha.find('input[id^="campo1_"]').val();

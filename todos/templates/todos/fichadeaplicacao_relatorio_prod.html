@@ -64,13 +64,11 @@
     </thead>
     <tbody>
       {% for produto, previsto in dados_estruturados.items %}
-       {% with numero_parenteses=produto|slice:"-5:-1"|cut:"("|cut:")"|cut:" " %}
-          <tr>
-              <th scope="row">E{{ numero_parenteses }}</th>
-              <td style="text-align: left">{{ produto }}</td>
-              <td style="text-align: left">{{ previsto|floatformat:2  }}</td>
-          </tr>
-        {% endwith %}
+        <tr>
+          <th scope="row">P{{ forloop.counter }}</th>
+          <td style="text-align: left">{{ produto }}</td>
+          <td style="text-align: left">{{ previsto|floatformat:2  }}</td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>

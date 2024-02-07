@@ -193,11 +193,11 @@
               <td>{{ forloop.counter }}</td>
                 <td>
                   <select id="listaProdutos" class="campo-selecao" required>
-                  <option value="{{ ficha.produto|default:'' }}">{{ ficha.produto|default:'' }}</option>
+                  <option value="{{ ficha.produto|default:'' }}">{{ ficha.nome_produto|default:'' }}{% if ficha.produto %} - ({{ ficha.produto }}){% endif %}</option>
                   {% if ficha.produto %}<option value="" ></option>{% endif %}
                     {% for produto in produtos %}
                       {% if produto.ativo == 1 %}
-                        <option value={{ produto.produto }}>{{ produto.produto }} - ({{ produto.codigo }})</option>
+                        <option value={{ produto.codigo }}>{{ produto.produto }} - ({{ produto.codigo }})</option>
                       {% endif %}
                     {% endfor %}
                   </select>
@@ -349,7 +349,7 @@
             var linha = $(this);
 
             // Colete os valores dos campos na linha atual
-            var produto = linha.find('select option:selected').text();
+            var produto = linha.find('select option:selected').val();
             var dose = parseFloat(linha.find('input[id^="dose_"]').val().replace(',', '.'));
             var campo1 = linha.find('input[id^="campo1_"]').val();
             var campo2 = linha.find('input[id^="campo2_"]').val();

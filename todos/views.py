@@ -17,7 +17,11 @@ import pytz
 from datetime import datetime
 from django.utils import timezone
 import json
-from todos.routers import DatabaseSynchronizer, DatabaseDownloader
+from todos.routers import (
+    DatabaseSynchronizer,
+    DatabaseDownloader,
+    ModificarProdutoRouter,
+)
 from collections import defaultdict
 
 from .models import Estufa, Atividade, Produtos, TipoIrrigador, FichaDeAplicacao
@@ -26,10 +30,18 @@ from .forms import ItemForm
 from django.shortcuts import render
 
 
+def muda_cod(request):
+    # Chamar o método de classe para modificar os produtos
+    response = ModificarProdutoRouter.modificar_produtos()
+
+    # Retornar a resposta para o cliente
+    return response
+
+
 def sync_db_view(request):
-    DatabaseSynchronizer.sync_db_estufa()
-    DatabaseSynchronizer.sync_db_produto()
-    DatabaseSynchronizer.sync_db_atividade()
+    DatabaseDownloader.sync_db_estufa()
+    DatabaseDownloader.sync_db_produto()
+    DatabaseDownloader.sync_db_atividade()
     DatabaseSynchronizer.sync_db()
     return HttpResponseRedirect(reverse("ficha_list"))
 
@@ -63,6 +75,15 @@ class FichaRelatorioProduto(ListView):
             float
         )  # Dicionário padrão para armazenar previstos por produto
 
+        queryset = self.get_queryset()
+        for ficha in queryset:
+            print(ficha.pk)
+            for item in ficha.dados:
+                if "produto" in item:
+                    cod_produto = item["produto"]
+                    produto = Produtos.objects.get(codigo=cod_produto)
+                    item["nome_produto"] = produto.produto
+
         for ficha in self.get_queryset():
             if ficha.ativo:
                 dados_json_lista = (
@@ -90,6 +111,14 @@ class FichaFiltro(ListView):
         context["estufas"] = Estufa.objects.all()
         context["atividades"] = Atividade.objects.all()
         context["tipo_irrigadores"] = TipoIrrigador.objects.all()
+
+        # Atualizar os dados do produto
+        for ficha in context["fichadeaplicacao_list"]:
+            for item in ficha.dados:
+                if "produto" in item:
+                    cod_produto = item["produto"]
+                    produto = Produtos.objects.get(codigo=cod_produto)
+                    item["nome_produto"] = produto.produto
         return context
 
     def get_queryset(self):
@@ -146,6 +175,12 @@ class FichaFiltroProduto(ListView):
 
         # Estruturação dos dados
         dados_estruturados = defaultdict(float)
+        for ficha in queryset:
+            for item in ficha.dados:
+                if "produto" in item:
+                    cod_produto = item["produto"]
+                    produto = Produtos.objects.get(codigo=cod_produto)
+                    item["nome_produto"] = produto.produto
 
         for ficha in queryset:
             if ficha.ativo:
@@ -153,11 +188,11 @@ class FichaFiltroProduto(ListView):
                     ficha.dados
                 )  # Não é necessário usar .get() para listas
                 for item in dados_json_lista:
-                    if "produto" in item and "previsto" in item:
+                    if "nome_produto" in item and "previsto" in item:
                         # Adiciona ou soma previsto ao produto na estrutura
                         if item["previsto"] != "":
                             previsto = float(item["previsto"])
-                            dados_estruturados[item["produto"]] += previsto
+                            dados_estruturados[item["nome_produto"]] += previsto
 
         # Convertendo o defaultdict para um dicionário regular
         context["dados_estruturados"] = dict(dados_estruturados)
@@ -293,7 +328,7 @@ def todo_home(request):
     if ficha_aplicacao_count is None:
         ficha_aplicacao_count = 1179
     else:
-        ficha_aplicacao_count + 1
+        ficha_aplicacao_count
 
     estufas = Estufa.objects.all()
     atividades = Atividade.objects.all()
@@ -302,7 +337,7 @@ def todo_home(request):
     ran = [i for i in range(1, 11)]
 
     context = {
-        "fcc": ficha_aplicacao_count,
+        "fcc": ficha_aplicacao_count + 1,
         "estufas": estufas,
         "atividades": atividades,
         "produtos": produtos,
@@ -322,6 +357,12 @@ def todo_repetir(request, pk):
     ran = [i for i in range(1, 11)]
     pk_view = ficha_aplicacao.pk + 1
     print(ficha_aplicacao)
+
+    for item in ficha_aplicacao.dados:
+        if "produto" in item:
+            cod_produto = item["produto"]
+            produto = Produtos.objects.get(codigo=cod_produto)
+            item["nome_produto"] = produto.produto
 
     if len(ficha_aplicacao.dados) < 10:
         ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
@@ -346,6 +387,12 @@ def todo_update(request, pk):
     produtos = Produtos.objects.all().order_by("descricao")
     tipos_irrigador = TipoIrrigador.objects.all()
     ran = [i for i in range(1, 11)]
+
+    for item in ficha_aplicacao.dados:
+        if "produto" in item:
+            cod_produto = item["produto"]
+            produto = Produtos.objects.get(codigo=cod_produto)
+            item["nome_produto"] = produto.produto
 
     if len(ficha_aplicacao.dados) < 10:
         ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
@@ -400,7 +447,7 @@ def receber_dados(request):
             data_aplicada=data_aplicada,
             obs=obs,
         )
-        ficha_aplicacao.save(using="secondary")
+        ficha_aplicacao.save()
 
         return JsonResponse({"status": "success"}, safe=False)
     else:
@@ -456,6 +503,12 @@ def ImprimirFicha(request, pk):
     tipos_irrigador = TipoIrrigador.objects.all()
     ran = [i for i in range(1, 11)]
 
+    for item in ficha_aplicacao.dados:
+        if "produto" in item:
+            cod_produto = item["produto"]
+            produto = Produtos.objects.get(codigo=cod_produto)
+            item["nome_produto"] = produto.produto
+
     if len(ficha_aplicacao.dados) < 10:
         ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
 
@@ -478,6 +531,12 @@ def FichaView(request, pk):
     produtos = Produtos.objects.all()
     tipos_irrigador = TipoIrrigador.objects.all()
     ran = [i for i in range(1, 11)]
+
+    for item in ficha_aplicacao.dados:
+        if "produto" in item:
+            cod_produto = item["produto"]
+            produto = Produtos.objects.get(codigo=cod_produto)
+            item["nome_produto"] = produto.produto
 
     if len(ficha_aplicacao.dados) < 10:
         ficha_aplicacao.dados += [{}] * (10 - len(ficha_aplicacao.dados))
@@ -505,17 +564,29 @@ class FichaListView(ListView):
     template_name = "fichadeaplicacao_list.html"
 
     def get_queryset(self):
-        return FichaDeAplicacao.objects.all().order_by("id")
+        queryset = FichaDeAplicacao.objects.all().order_by("id")
+
+        for ficha in queryset:
+            print(ficha.pk)
+            for item in ficha.dados:
+                if "produto" in item:
+                    cod_produto = item["produto"]
+                    produto = Produtos.objects.get(codigo=cod_produto)
+
+                    item["nome_produto"] = produto.produto
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context["estufas"] = Estufa.objects.all()
         context["atividades"] = Atividade.objects.all()
         context["tipo_irrigadores"] = TipoIrrigador.objects.all()
+
         return context
 
     def get_template_names(self):
-        # Verifique a parte da URL para decidir qual template usar
         if "relatorio" in self.request.path:
             return ["fichadeaplicacao_relatorio.html"]
         return ["fichadeaplicacao_list.html"]

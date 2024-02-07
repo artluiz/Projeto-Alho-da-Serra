@@ -209,7 +209,7 @@
       <tr>
         <td>{{ forloop.counter }}</td>
         <td>
-          <span class="campo-selecao"> {{ ficha.produto|default:'' }} </span>
+          <span class="campo-selecao"> {{ ficha.nome_produto|default:'' }} </span>
         </td>
         <td>
           <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>

@@ -41,7 +41,7 @@ class Atividade(models.Model):
 
 class Produtos(models.Model):
     data_criada = models.DateTimeField(
-        verbose_name="Data de criação", blank=False, auto_now=False
+        verbose_name="Data de criação", blank=False, auto_now_add=True
     )
     data_atualizado = models.DateTimeField(
         verbose_name="Data da aplicação",
@@ -67,7 +67,7 @@ class TipoIrrigador(models.Model):
 
 class FichaDeAplicacao(models.Model):
     data_criada = models.DateTimeField(
-        verbose_name="Data de criação", blank=False, auto_now=False
+        verbose_name="Data de criação", blank=False, auto_now_add=True
     )
     data_atualizado = models.DateTimeField(
         verbose_name="Data da aplicação",

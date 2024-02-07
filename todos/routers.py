@@ -7,17 +7,54 @@ from django.utils import timezone
 import pytz
 import json
 from datetime import datetime, date
+from django.http import JsonResponse
+
+
+class ModificarProdutoRouter:
+    @staticmethod
+    def modificar_produto(dados):
+        dados_modificados = []
+
+        # Iterar sobre os dados e modificar o campo 'produto' conforme especificado
+        for item in dados:
+            if "produto" in item:
+                produto = (
+                    item["produto"]
+                    .replace(" ", "")
+                    .replace("-", "")
+                    .replace("(", "")
+                    .replace(")", "")
+                    .strip()[-5:]
+                )
+                item["produto"] = produto
+            dados_modificados.append(item)
+
+        return dados_modificados
+
+    @classmethod
+    def modificar_produtos(cls):
+        try:
+            # Obter todas as fichas do banco de dados
+            fichas = FichaDeAplicacao.objects.all()
+
+            # Modificar o campo 'produto' de todas as fichas
+            for ficha in fichas:
+                ficha.dados = cls.modificar_produto(ficha.dados)
+                ficha.save()
+
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "Dados atualizados com sucesso para todas as fichas.",
+                }
+            )
+        except Exception as e:
+            return JsonResponse({"success": False, "message": str(e)})
 
 
 class FichaDeAplicacaoRouter:
-    """
-    Um router para controlar todas as operações de banco de dados no modelo 'FichaDeAplicacao'.
-    """
 
     def db_for_read(self, model, **hints):
-        """
-        As leituras vão para o banco de dados SQLite por padrão.
-        """
         if model == FichaDeAplicacao:
             return "default"
         return None

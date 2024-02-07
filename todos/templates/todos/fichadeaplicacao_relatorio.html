@@ -79,7 +79,7 @@
           <ul class="ul_first">
             {% for item in ficha.dados %}
               <li>
-                <span class="campo-selecao"> {{ item.produto|default:''|safe }} </span>
+                <span> {{ item.nome_produto|default:''|safe }} </span>
               </li>
             {% endfor %}
           </ul>
