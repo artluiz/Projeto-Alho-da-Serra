@@ -156,7 +156,7 @@
 
       <div >
         <p>
-      <p href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</p>
+      <span href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</span>
         </p>
       </div>
     </div>
@@ -209,7 +209,7 @@
       <tr>
         <td>{{ forloop.counter }}</td>
         <td>
-          <span class="campo-selecao"> {{ ficha.nome_produto|default:'' }} </span>
+          <span class="campo-selecao"> {{ ficha.nome_produto|default:'' }} {% if ficha.produto %}- ({{ ficha.produto|default:'' }}){% endif %}</span>
         </td>
         <td>
           <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>

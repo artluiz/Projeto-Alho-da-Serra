@@ -39,17 +39,17 @@ def muda_cod(request):
 
 
 def sync_db_view(request):
-    DatabaseDownloader.sync_db_estufa()
-    DatabaseDownloader.sync_db_produto()
-    DatabaseDownloader.sync_db_atividade()
+    DatabaseSynchronizer.sync_db_atividade()
+    DatabaseSynchronizer.sync_db_estufa()
+    DatabaseSynchronizer.sync_db_produto()
     DatabaseSynchronizer.sync_db()
     return HttpResponseRedirect(reverse("ficha_list"))
 
 
 def down_db_view(request):
+    DatabaseDownloader.sync_db_atividade()
     DatabaseDownloader.sync_db_estufa()
     DatabaseDownloader.sync_db_produto()
-    DatabaseDownloader.sync_db_atividade()
     DatabaseDownloader.sync_db()
     return HttpResponseRedirect(reverse("ficha_list"))
 
@@ -77,7 +77,6 @@ class FichaRelatorioProduto(ListView):
 
         queryset = self.get_queryset()
         for ficha in queryset:
-            print(ficha.pk)
             for item in ficha.dados:
                 if "produto" in item:
                     cod_produto = item["produto"]
@@ -250,7 +249,7 @@ def upload_excel_file(request):
                     # Lidar com dados faltantes, por exemplo, pulando a linha ou registrando um erro
                     continue
 
-                data_criada = timezone.now().astimezone(pytz.timezone("Europe/London"))
+                data_criada = datetime.now()
 
                 produto, created = Produtos.objects.get_or_create(codigo=produto_cod)
                 produto.produto = row["Produto"]
@@ -297,7 +296,6 @@ def ficha_toggle_active(request, pk):
 
 @csrf_exempt
 def ficha_toggle_pendente(request, pk):
-    print("obj")
     obj = get_object_or_404(FichaDeAplicacao, pk=pk)
 
     if request.method == "PUT" or request.method == "POST":
@@ -311,7 +309,6 @@ def ficha_toggle_pendente(request, pk):
 
 @csrf_exempt
 def produto_toggle_active(request, pk):
-    print("obj")
     obj = get_object_or_404(Produtos, pk=pk)
 
     if request.method == "PUT" or request.method == "POST":
@@ -356,7 +353,6 @@ def todo_repetir(request, pk):
     tipos_irrigador = TipoIrrigador.objects.all()
     ran = [i for i in range(1, 11)]
     pk_view = ficha_aplicacao.pk + 1
-    print(ficha_aplicacao)
 
     for item in ficha_aplicacao.dados:
         if "produto" in item:
@@ -412,7 +408,6 @@ def todo_update(request, pk):
 @csrf_exempt
 def receber_dados(request):
     if request.method == "POST" or request.method == "PUT":
-        print(request.body)
         # Decodifique os bytes para uma string e carregue o JSON
         dados = json.loads(request.body.decode("utf-8"))
 
@@ -427,7 +422,7 @@ def receber_dados(request):
         irrigador_id = TipoIrrigador.objects.get(pk=(dados["irrigador_id"]))
         dados_tabela = dados["dados_tabela"]
         obs = dados["obs"]
-        data_criada = timezone.now().astimezone(pytz.timezone("Europe/London"))
+        data_criada = timezone.now()
 
         # data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         data_aplicada = datetime.strptime(dados["data1"], "%Y-%m-%d")
@@ -457,10 +452,8 @@ def receber_dados(request):
 @csrf_exempt
 def atualizar_dados(request):
     if request.method == "PUT":
-        print(request.body)
         # Decodifique os bytes para uma string e carregue o JSON
         dados = json.loads(request.body.decode("utf-8"))
-        print(dados)
         # Obtenha a ficha existente pelo id
         ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=dados["ficha_pk"])
 
@@ -487,7 +480,6 @@ def atualizar_dados(request):
         )
 
         # Salve a instância para atualizar o banco de dados
-        print(ficha_aplicacao)
         ficha_aplicacao.save()
 
         return JsonResponse({"status": "success"}, safe=False)
@@ -567,7 +559,6 @@ class FichaListView(ListView):
         queryset = FichaDeAplicacao.objects.all().order_by("id")
 
         for ficha in queryset:
-            print(ficha.pk)
             for item in ficha.dados:
                 if "produto" in item:
                     cod_produto = item["produto"]
@@ -603,6 +594,7 @@ class EstufaCreateView(CreateView):
 
     def form_valid(self, form):
         # Atualiza no banco de dados primário
+        form.instance.data_criada = datetime.now()
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
         return super().form_valid(form)
@@ -647,6 +639,7 @@ class AtividadeUpdateView(UpdateView):
 
     def form_valid(self, form):
         # Atualiza no banco de dados primário
+        form.instance.data_criada = datetime.now()
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
         return super().form_valid(form)
@@ -667,6 +660,7 @@ class ProdutosCreateView(CreateView):
 
     def form_valid(self, form):
         # Atualiza no banco de dados primário
+        form.instance.data_criada = datetime.now()
         form.instance.save(using="default")
         # Atualiza no banco de dados secundário
         return super().form_valid(form)

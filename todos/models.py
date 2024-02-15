@@ -4,7 +4,7 @@ from django.db import models
 # Create your models here.
 class Estufa(models.Model):
     data_criada = models.DateTimeField(
-        verbose_name="Data de criação", blank=False, auto_now=False, auto_now_add=True
+        verbose_name="Data de criação", blank=False, auto_now=False, auto_now_add=False
     )
     data_atualizado = models.DateTimeField(
         verbose_name="Data da aplicação",
@@ -41,7 +41,7 @@ class Atividade(models.Model):
 
 class Produtos(models.Model):
     data_criada = models.DateTimeField(
-        verbose_name="Data de criação", blank=False, auto_now_add=True
+        verbose_name="Data de criação", blank=False, auto_now_add=False
     )
     data_atualizado = models.DateTimeField(
         verbose_name="Data da aplicação",
@@ -67,7 +67,7 @@ class TipoIrrigador(models.Model):
 
 class FichaDeAplicacao(models.Model):
     data_criada = models.DateTimeField(
-        verbose_name="Data de criação", blank=False, auto_now_add=True
+        verbose_name="Data de criação", blank=False, auto_now_add=False
     )
     data_atualizado = models.DateTimeField(
         verbose_name="Data da aplicação",

@@ -72,26 +72,22 @@ class DatabaseSynchronizer:
                 "secondary"
             ).aggregate(models.Max("data_criada"))["data_criada__max"]
             if latest_date_in_database:
-                latest_date_in_database = latest_date_in_database.astimezone(
-                    pytz.timezone("Europe/London")
-                )
+                latest_date_in_database = latest_date_in_database
+                timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada_utc = row[1].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
-                ficha_data_atualizado = datetime.combine(row[11], datetime.min.time())
+                ficha_data_criada = row[11]
+                ficha_data_atualizado = datetime.combine(row[8], datetime.min.time())
                 if (
                     not latest_date_in_database
                     or ficha_data_criada > latest_date_in_database
                 ):
-                    area = row[2] if row[2] is not None else 0.0
-                    dados = json.loads(row[3] if row[3] is not None else {})
-                    data_aplicada = datetime.combine(row[4], datetime.min.time())
-                    atividade_id = row[5] if row[5] is not None else 0
-                    estufa_id = row[6] if row[6] is not None else 0
-                    irrigador_id = row[7] if row[7] is not None else 0
-                    ativo = row[8] if row[8] is not None else False
+                    area = row[1] if row[1] is not None else 0.0
+                    dados = json.loads(row[2] if row[2] is not None else {})
+                    data_aplicada = datetime.combine(row[3], datetime.min.time())
+                    atividade_id = row[4] if row[4] is not None else 0
+                    estufa_id = row[5] if row[5] is not None else 0
+                    irrigador_id = row[6] if row[6] is not None else 0
+                    ativo = row[7] if row[7] is not None else False
                     pendente = row[9] if row[9] is not None else False
                     obs = row[10] if row[10] is not None else ""
 
@@ -110,7 +106,7 @@ class DatabaseSynchronizer:
                     )
             for row in rows:
                 id_default = row[0]
-                data_atualizacao_default = row[11]
+                data_atualizacao_default = row[8]
 
                 cursor.execute(
                     "SELECT * FROM todos_fichadeaplicacao WHERE id = %s", [id_default]
@@ -128,7 +124,7 @@ class DatabaseSynchronizer:
                     )
 
                     if data_atualizacao_default > data_atualizacao_secondary:
-                        dados_jsonb = json.dumps(row[3]) if row[3] is not None else None
+                        dados_jsonb = json.dumps(row[2]) if row[2] is not None else None
                         dados_jsonb = json.loads(dados_jsonb)
                         cursor.execute(
                             "UPDATE todos_fichadeaplicacao SET "
@@ -145,15 +141,15 @@ class DatabaseSynchronizer:
                             "obs = %s "
                             "WHERE id = %s",
                             [
-                                row[1],
                                 row[11],
-                                row[2],
+                                row[8],
+                                row[1],
                                 dados_jsonb,
-                                datetime.combine(row[4], datetime.min.time()),
+                                datetime.combine(row[3], datetime.min.time()),
+                                row[4],
                                 row[5],
                                 row[6],
                                 row[7],
-                                row[8],
                                 row[9],
                                 row[10],
                                 id_default,
@@ -164,45 +160,40 @@ class DatabaseSynchronizer:
 
     @staticmethod
     def sync_db_produto():
-        with connections["default"].cursor() as cursor:
-            cursor.execute("SELECT * FROM todos_produtos ORDER BY id;")
-            rows = cursor.fetchall()
+        with connections["default"].cursor() as cursor_default:
+            cursor_default.execute("SELECT * FROM todos_produtos")
+            rows = cursor_default.fetchall()
 
         with connections["secondary"].cursor() as cursor:
-            latest_date_in_database = Produtos.objects.using("secondary").aggregate(
-                models.Max("data_criada")
-            )["data_criada__max"]
-            if latest_date_in_database:
-                latest_date_in_database = latest_date_in_database.astimezone(
-                    pytz.timezone("Europe/London")
-                )
+            cursor.execute("SELECT codigo FROM todos_produtos")
+            existing_product_codes = {row[0] for row in cursor.fetchall()}
+            print("Existing product codes:", existing_product_codes)
+
+            if not existing_product_codes:
+                print("No existing product codes found in the secondary database.")
+                existing_product_codes = set()
+
             for row in rows:
-                ficha_data_criada_utc = row[6].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
-                if (
-                    not latest_date_in_database
-                    or ficha_data_criada > latest_date_in_database
-                ):
+                product_code = row[1]
+                if product_code not in existing_product_codes:
                     produto = row[4] if row[4] is not None else 0
                     codigo = row[1] if row[1] is not None else 0
                     descricao = row[2] if row[2] is not None else ""
                     ativo = row[3] if row[3] is not None else ""
                     Produtos.objects.using("secondary").create(
-                        data_criada=ficha_data_criada,
-                        data_atualizado=row[5],
-                        produto=produto,
+                        data_criada=row[1],
+                        data_atualizado=row[2],
                         codigo=codigo,
                         descricao=descricao,
                         ativo=ativo,
+                        produto=produto,
                     )
             for row in rows:
-                id_default = row[0]
+                codigo_default = row[1]
                 data_atualizacao_default = row[5]
 
                 cursor.execute(
-                    "SELECT * FROM todos_produtos WHERE id = %s", [id_default]
+                    "SELECT * FROM todos_produtos WHERE codigo = %s", [codigo_default]
                 )
                 row_secondary = cursor.fetchone()
 
@@ -225,7 +216,7 @@ class DatabaseSynchronizer:
                             "descricao = %s, "
                             "ativo = %s, "
                             "produto = %s "
-                            "WHERE id = %s",
+                            "WHERE codigo = %s",
                             [
                                 row[6],
                                 row[5],
@@ -233,7 +224,7 @@ class DatabaseSynchronizer:
                                 row[2],
                                 row[3],
                                 row[4],
-                                id_default,
+                                codigo_default,
                             ],
                         )
 
@@ -250,14 +241,10 @@ class DatabaseSynchronizer:
                 models.Max("data_criada")
             )["data_criada__max"]
             if latest_date_in_database:
-                latest_date_in_database = latest_date_in_database.astimezone(
-                    pytz.timezone("Europe/London")
-                )
+                latest_date_in_database = latest_date_in_database
+                timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada_utc = row[6].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
+                ficha_data_criada = row[6].replace(tzinfo=timezone1)
 
                 if (
                     not latest_date_in_database
@@ -286,11 +273,10 @@ class DatabaseSynchronizer:
                 if row_secondary:
                     data_atualizacao_secondary = row_secondary[5]
 
-                    data_atualizacao_default = data_atualizacao_default.astimezone(
-                        pytz.timezone("Europe/London")
-                    )
-                    data_atualizacao_secondary = data_atualizacao_secondary.astimezone(
-                        pytz.timezone("Europe/London")
+                    data_atualizacao_default = data_atualizacao_default
+                    timezone1 = data_atualizacao_default.tzinfo
+                    data_atualizacao_secondary = data_atualizacao_secondary.replace(
+                        tzinfo=timezone1
                     )
 
                     if data_atualizacao_default > data_atualizacao_secondary:
@@ -327,14 +313,10 @@ class DatabaseSynchronizer:
                 models.Max("data_criada")
             )["data_criada__max"]
             if latest_date_in_database:
-                latest_date_in_database = latest_date_in_database.astimezone(
-                    pytz.timezone("Europe/London")
-                )
+                latest_date_in_database = latest_date_in_database
+                timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada_utc = row[3].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
+                ficha_data_criada = row[3].replace(tzinfo=timezone1)
 
                 if (
                     not latest_date_in_database
@@ -361,11 +343,10 @@ class DatabaseSynchronizer:
                 if row_secondary:
                     data_atualizacao_secondary = row_secondary[4]
 
-                    data_atualizacao_default = data_atualizacao_default.astimezone(
-                        pytz.timezone("Europe/London")
-                    )
-                    data_atualizacao_secondary = data_atualizacao_secondary.astimezone(
-                        pytz.timezone("Europe/London")
+                    data_atualizacao_default = data_atualizacao_default
+                    timezone1 = data_atualizacao_default.tzinfo
+                    data_atualizacao_secondary = data_atualizacao_secondary.replace(
+                        tzinfo=timezone1
                     )
 
                     if data_atualizacao_default > data_atualizacao_secondary:
@@ -401,17 +382,11 @@ class DatabaseDownloader:
                 "default"
             ).aggregate(models.Max("data_criada"))["data_criada__max"]
 
-            latest_date_in_database = latest_date_in_database.astimezone(
-                pytz.timezone("Europe/London")
-            )
-            print(latest_date_in_database)
-
+            if latest_date_in_database:
+                latest_date_in_database = latest_date_in_database
+                timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada_utc = row[1].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
-
+                ficha_data_criada = row[1].replace(tzinfo=timezone1)
                 if (
                     not latest_date_in_database
                     or ficha_data_criada > latest_date_in_database
@@ -450,13 +425,12 @@ class DatabaseDownloader:
                 row_default = cursor.fetchone()
 
                 if row_default:
-                    data_atualizacao_default = row_default[11]
+                    data_atualizacao_default = row_default[8]
 
-                    data_atualizacao_secondary = data_atualizacao_secondary.astimezone(
-                        pytz.timezone("Europe/London")
-                    )
-                    data_atualizacao_default = data_atualizacao_default.astimezone(
-                        pytz.timezone("Europe/London")
+                    data_atualizacao_default = data_atualizacao_default
+                    timezone1 = data_atualizacao_default.tzinfo
+                    data_atualizacao_secondary = data_atualizacao_secondary.replace(
+                        tzinfo=timezone1
                     )
 
                     if data_atualizacao_secondary > data_atualizacao_default:
@@ -495,61 +469,52 @@ class DatabaseDownloader:
     #########################################################################################################
 
     def sync_db_produto():
-        with connections["secondary"].cursor() as cursor:
-            cursor.execute("SELECT * FROM todos_produtos ORDER BY id;")
-            rows = cursor.fetchall()
+        with connections["secondary"].cursor() as cursor_secondary:
+            cursor_secondary.execute("SELECT * FROM todos_produtos")
+            rows = cursor_secondary.fetchall()
 
         with connections["default"].cursor() as cursor:
-            latest_date_in_database = Produtos.objects.using("default").aggregate(
-                models.Max("data_criada")
-            )["data_criada__max"]
+            cursor.execute("SELECT codigo FROM todos_produtos")
+            existing_product_codes = {row[0] for row in cursor.fetchall()}
+            print("Existing product codes:", existing_product_codes)
 
-            latest_date_in_database = latest_date_in_database.astimezone(
-                pytz.timezone("Europe/London")
-            )
-            print(latest_date_in_database)
+            if not existing_product_codes:
+                print("No existing product codes found in the secondary database.")
+                existing_product_codes = set()
 
             for row in rows:
-                ficha_data_criada_utc = row[6].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
-
-                if (
-                    not latest_date_in_database
-                    or ficha_data_criada > latest_date_in_database
-                ):
+                print("entrou.")
+                product_code = row[2]
+                if product_code not in existing_product_codes:
                     produto = row[1] if row[1] is not None else 0
-                    codigo = row[2] if row[2] is not None else 0
+                    codigo = row[2] if row[2] is not None else ""
                     descricao = row[3] if row[3] is not None else ""
-                    ativo = row[4] if row[4] is not None else ""
-
+                    ativo = row[4] if row[4] is not None else 0
                     Produtos.objects.using("default").create(
-                        data_criada=ficha_data_criada,
+                        data_criada=row[6],
                         data_atualizado=row[5],
-                        produto=produto,
                         codigo=codigo,
                         descricao=descricao,
                         ativo=ativo,
+                        produto=produto,
                     )
 
             for row in rows:
-                id_secondary = row[0]
+                cod_secondary = row[2]
                 data_atualizacao_secondary = row[5]
 
                 cursor.execute(
-                    "SELECT * FROM todos_produtos WHERE id = %s", [id_secondary]
+                    "SELECT * FROM todos_produtos WHERE codigo = %s", [cod_secondary]
                 )
                 row_default = cursor.fetchone()
 
                 if row_default:
                     data_atualizacao_default = row_default[5]
 
-                    data_atualizacao_secondary = data_atualizacao_secondary.astimezone(
-                        pytz.timezone("Europe/London")
-                    )
-                    data_atualizacao_default = data_atualizacao_default.astimezone(
-                        pytz.timezone("Europe/London")
+                    data_atualizacao_default = data_atualizacao_default
+                    timezone1 = data_atualizacao_default.tzinfo
+                    data_atualizacao_secondary = data_atualizacao_secondary.replace(
+                        tzinfo=timezone1
                     )
 
                     if data_atualizacao_secondary > data_atualizacao_default:
@@ -557,11 +522,11 @@ class DatabaseDownloader:
                             "UPDATE todos_produtos SET "
                             "data_criada = %s, "
                             "data_atualizado = %s, "
-                            "produto = %s, "
                             "codigo = %s, "
                             "descricao = %s, "
-                            "ativo = %s "
-                            "WHERE id = %s",
+                            "ativo = %s, "
+                            "produto = %s "
+                            "WHERE codigo = %s",
                             [
                                 row[6],
                                 row[5],
@@ -569,7 +534,7 @@ class DatabaseDownloader:
                                 row[2],
                                 row[3],
                                 row[4],
-                                id_secondary,
+                                cod_secondary,
                             ],
                         )
 
@@ -583,17 +548,11 @@ class DatabaseDownloader:
             latest_date_in_database = Estufa.objects.using("default").aggregate(
                 models.Max("data_criada")
             )["data_criada__max"]
-
-            latest_date_in_database = latest_date_in_database.astimezone(
-                pytz.timezone("Europe/London")
-            )
-            print(latest_date_in_database)
-
+            if latest_date_in_database:
+                latest_date_in_database = latest_date_in_database
+                timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada_utc = row[6].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
+                ficha_data_criada = row[6].replace(tzinfo=timezone1)
 
                 if (
                     not latest_date_in_database
@@ -605,7 +564,7 @@ class DatabaseDownloader:
                     ativo = row[4] if row[4] is not None else True
 
                     Estufa.objects.using("default").create(
-                        data_criada=ficha_data_criada,
+                        data_criada=row[6],
                         data_atualizado=row[5],
                         fazenda=fazenda,
                         nome_estufa=nome_estufa,
@@ -625,11 +584,10 @@ class DatabaseDownloader:
                 if row_default:
                     data_atualizacao_default = row_default[5]
 
-                    data_atualizacao_secondary = data_atualizacao_secondary.astimezone(
-                        pytz.timezone("Europe/London")
-                    )
-                    data_atualizacao_default = data_atualizacao_default.astimezone(
-                        pytz.timezone("Europe/London")
+                    data_atualizacao_default = data_atualizacao_default
+                    timezone1 = data_atualizacao_default.tzinfo
+                    data_atualizacao_secondary = data_atualizacao_secondary.replace(
+                        tzinfo=timezone1
                     )
 
                     if data_atualizacao_secondary > data_atualizacao_default:
@@ -663,17 +621,11 @@ class DatabaseDownloader:
             latest_date_in_database = Estufa.objects.using("default").aggregate(
                 models.Max("data_criada")
             )["data_criada__max"]
-
-            latest_date_in_database = latest_date_in_database.astimezone(
-                pytz.timezone("Europe/London")
-            )
-            print(latest_date_in_database)
-
+            if latest_date_in_database:
+                latest_date_in_database = latest_date_in_database
+                timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada_utc = row[4].replace(tzinfo=pytz.UTC)
-                ficha_data_criada = ficha_data_criada_utc.astimezone(
-                    timezone.get_default_timezone()
-                ).replace(tzinfo=timezone.get_default_timezone())
+                ficha_data_criada = row[4].replace(tzinfo=timezone1)
 
                 if (
                     not latest_date_in_database
@@ -701,11 +653,10 @@ class DatabaseDownloader:
                 if row_default:
                     data_atualizacao_default = row_default[3]
 
-                    data_atualizacao_secondary = data_atualizacao_secondary.astimezone(
-                        pytz.timezone("Europe/London")
-                    )
-                    data_atualizacao_default = data_atualizacao_default.astimezone(
-                        pytz.timezone("Europe/London")
+                    data_atualizacao_default = data_atualizacao_default
+                    timezone1 = data_atualizacao_default.tzinfo
+                    data_atualizacao_secondary = data_atualizacao_secondary.replace(
+                        tzinfo=timezone1
                     )
 
                     if data_atualizacao_secondary > data_atualizacao_default:
