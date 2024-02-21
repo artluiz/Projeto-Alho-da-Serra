@@ -100,6 +100,11 @@
         background-color: #f2f2f2;
     }
     </style>
+    {% load static %}
+    <script src= "{% static 'js/html2pdf.bundle.min.js'%}"
+    integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" 
+    crossorigin="anonymous" 
+    referrerpolicy="no-referrer"></script>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
         document.getElementById('campo1_{{ i }}').addEventListener('blur', function (e) {
@@ -107,140 +112,158 @@
         });
     </script>
 <body>
-  <div class="cabecalho">
-    <!-- Logo da empresa -->
-    <div class="logo-container">
-      <img
-        src="{% static '/todos/images/logo.jpeg' %}"
-        alt="Logo da Empresa"
-        class="logo"
-      />
-      <h1 style="font-size: 50px">Controle de aplicações</h1>
+  <div id="content">
+    <div class="cabecalho">
+      <!-- Logo da empresa -->
+      <div class="logo-container">
+        <img
+          src="{% static '/todos/images/logo.jpeg' %}"
+          alt="Logo da Empresa"
+          class="logo"
+        />
+        <h1 style="font-size: 50px">Controle de aplicações</h1>
+      </div>
+
+      <!-- Número da relação e data da operação -->
+      <div class="info-container">
+        <div
+          class="numero-recomendacao"
+          id="meuElemento"
+          data-ficha-pk="{{ ficha.pk }}"
+        >
+          <h2>N ̊ da Recomendação: E{{ ficha.pk }}</h2>
+        </div>
+        <div class="data-operacao">
+          <h2>
+            Data da Aplicação: 
+            <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span></h2>
+        </div>
+      </div>
     </div>
 
-    <!-- Número da relação e data da operação -->
-    <div class="info-container">
-      <div
-        class="numero-recomendacao"
-        id="meuElemento"
-        data-ficha-pk="{{ ficha.pk }}"
-      >
-        <h2>N ̊ da Recomendação: E{{ ficha.pk }}</h2>
+    <div>
+      <div class="info">
+        <div style=" margin-right: 10px;">
+          <p>
+            Atividade:
+            <span class="campo-selecao" id="id_atividade">
+              {{ ficha.atividade.nome }}
+            </span>
+          </p>
+        </div>
+        <p href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</p>
+        <div >
+          <p>
+          </p>
+        </div>
       </div>
-      <div class="data-operacao">
-        <h2>
-          Data da Aplicação: 
-          <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span></h2>
-      </div>
-    </div>
-  </div>
 
-  <div>
-    <div class="info">
-      <div style=" margin-right: 10px;">
+      <div class="info2">
         <p>
-          Atividade:
-          <span class="campo-selecao" id="id_atividade">
-            {{ ficha.atividade.nome }}
+          Estufa:
+          <span class="campo-selecao" id="id_estufa">
+            {{ ficha.estufa.nome_estufa }}
+          </span>
+        </p>
+
+        <p>
+          Área:
+          <span id="id_area" name="area">{{ ficha.area }}</span>
+        </p>
+
+        <p>
+          Fazenda:
+          <span id="id_fazenda" name="fazenda">{{ ficha.estufa.fazenda }}</span>
+        </p>
+      </div>
+
+      <div class="info">
+        <p style:"border-bottom: 1px solid black;">
+          Irrigador:
+          <span class="campo-selecao" id="id_tipo_irrigador">
+            {{ ficha.irrigador.nome_tipo }}
           </span>
         </p>
       </div>
-      <p href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</p>
-      <div >
-        <p>
-        </p>
-      </div>
     </div>
 
-    <div class="info2">
-      <p>
-        Estufa:
-        <span class="campo-selecao" id="id_estufa">
-          {{ ficha.estufa.nome_estufa }}
-        </span>
-      </p>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Produto</th>
+          <th>Dose por HÁ</th>
+          <th>Setor A</th>
+          <th>Setor B</th>
+          <th>Anti Câmara</th>
+          <th>Consumo Previsto</th>
+          <th>Consumo Total</th>
+        </tr>
+      </thead>
 
-      <p>
-        Área:
-        <span id="id_area" name="area">{{ ficha.area }}</span>
-      </p>
-
-      <p>
-        Fazenda:
-        <span id="id_fazenda" name="fazenda">{{ ficha.estufa.fazenda }}</span>
+      <tbody>
+        {% for ficha in ficha.dados %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>
+            <span class="campo-selecao"> {{ ficha.nome_produto|default:'' }} {% if ficha.produto %}- ({{ ficha.produto|default:'' }}){% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.campo1 %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.campo2 %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.antiCamara %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.previsto %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.total|floatformat:2 }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <div style="border: 1px solid black; margin-top:10px;">
+      <p style="padding-top:15px;">
+        OBS: {{ ficha.obs|default:'' }}
       </p>
     </div>
-
-    <div class="info">
-      <p style:"border-bottom: 1px solid black;">
-        Irrigador:
-        <span class="campo-selecao" id="id_tipo_irrigador">
-          {{ ficha.irrigador.nome_tipo }}
-        </span>
-      </p>
-    </div>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Produto</th>
-        <th>Dose por HÁ</th>
-        <th>Setor A</th>
-        <th>Setor B</th>
-        <th>Anti Câmara</th>
-        <th>Consumo Previsto</th>
-        <th>Consumo Total</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for ficha in ficha.dados %}
-      <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>
-          <span class="campo-selecao"> {{ ficha.nome_produto|default:'' }} {% if ficha.produto %}- ({{ ficha.produto|default:'' }}){% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.campo1 %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.campo2 %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.antiCamara %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.previsto %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.total|floatformat:2 }}</span>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  
-  <div style="border: 1px solid black; margin-top:10px;">
-    <p style="padding-top:15px;">
-      OBS: {{ ficha.obs|default:'' }}
-    </p>
   </div>
     <a href="{% url 'imprimir_ficha' pk=ficha.pk %}"class="btn btn-primary btn-lg mt-2" style="text-decoration:none">Imprimir</a>
   
     <a href="{% url "ficha_list"%}" class="btn btn-secondary btn-lg mt-2"> Voltar</a>
-</body>
-<script>
-        $(document).ready(function(){
-            $('input').on('keypress', function(e){
-                if(e.which == 13) {
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
+
+    <button id="generate" class="btn btn-success btn-lg mt-2">Gerar PDF</button>
+  </body>
+  <script>
+    $(document).ready(function(){
+      $('input').on('keypress', function(e){
+        if(e.which == 13) {
+          e.preventDefault();
+        }
+      });
+    });
+  </script>
+  <script>
+    document.querySelector("#generate").addEventListener('click', function() {
+      const content = document.querySelector("#content");
+
+      const options = {
+        margin: [10, 10, 10, 10],
+        filename: "teste.pdf",
+        html2canvas:{scale:2},
+        jsPDF: {unit:"mm", format: "a4", orientation:"portrait"}
+      };
+
+      html2pdf().set(options).from(content).save();
+    });
+  </script>
 {% endblock content %}

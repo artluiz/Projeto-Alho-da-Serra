@@ -1,4 +1,5 @@
 {% extends "base.html" %} {% load static %}
+{% block page_title %} Cadastrar Ficha {% endblock page_title %}
 {% block content %} {% load tz %} 
     <style>
       /* Exemplo de estilo básico, personalize conforme necessário */
@@ -87,6 +88,9 @@
       .info a:last-child {
         border-left: none;
       }
+      .info2 p:last-child {
+        border-left: none;
+      }
 
       table {
             width: 100%;
@@ -140,7 +144,7 @@
             {% endfor %}
           </select>
         </a>
-            <p>Data da Aplicação<input type="date" id="data" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></p>
+        <p>Data da Aplicação<input type="date" id="data" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></p>
       </div>
       <div class="info2">
         <a> Estufa: <select class="campo-selecao", id="id_estufa">
@@ -159,8 +163,8 @@
         </a>
       </div>
       <div class="info">
-        <p> Irrigador: 
-          <select class="campo-selecao", id="id_tipo_irrigador">
+        <p style="min-width:700px;"> Tipo de Irrigador: 
+          <select class="campo-selecao", id="id_tipo_irrigador" style="min-width:500px;">
             <option value={{ ficha.irrigador.pk }}>{{ ficha.irrigador.nome_tipo}}</option>
             {% for tipo_irrigador in tipos_irrigador %}
               {% if tipo_irrigador.pk != ficha.irrigador.pk%}

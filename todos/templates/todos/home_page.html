@@ -1,4 +1,5 @@
 {% extends "base.html" %} {% load static %}
+{% block page_title %} Cadastrar Ficha {% endblock page_title %}
 {% block content %} {% load tz %} 
     <style>
       /* Exemplo de estilo básico, personalize conforme necessário */
@@ -155,7 +156,8 @@
         </a>
       </div>
       <div class="info">
-        <p> Irrigação: <select class="campo-selecao", id="id_tipo_irrigador" required>
+        <p style="min-width:700px;"> Tipo de Irrigador: 
+          <select class="campo-selecao", id="id_tipo_irrigador" style="min-width:500px;">
             <option value="">Selecione uma opção</option>
             {% for tipo_irrigador in tipos_irrigador %}
               {% if tipo_irrigador.ativo == 1 %}

@@ -39,11 +39,8 @@ def muda_cod(request):
 
 
 def sync_db_view(request):
-    DatabaseSynchronizer.sync_db_atividade()
-    DatabaseSynchronizer.sync_db_estufa()
-    DatabaseSynchronizer.sync_db_produto()
-    DatabaseSynchronizer.sync_db()
-    return HttpResponseRedirect(reverse("ficha_list"))
+    response = ModificarProdutoRouter.modificar_produtos()
+    return response
 
 
 def down_db_view(request):
@@ -130,10 +127,10 @@ class FichaFiltro(ListView):
         end_date = self.request.GET.get("end_date")
 
         if start_date and end_date:
-            queryset = queryset.filter(data_criada__range=(start_date, end_date))
+            queryset = queryset.filter(data_aplicada__range=(start_date, end_date))
         else:
             if start_date:
-                queryset = queryset.filter(data_criada__date=start_date)
+                queryset = queryset.filter(data_aplicada=start_date)
 
         if atividade_filter:
             queryset = queryset.filter(atividade__id=atividade_filter)
@@ -208,10 +205,10 @@ class FichaFiltroProduto(ListView):
         end_date = self.request.GET.get("end_date")
 
         if start_date and end_date:
-            queryset = queryset.filter(data_criada__range=(start_date, end_date))
+            queryset = queryset.filter(data_aplicada__range=(start_date, end_date))
         else:
             if start_date:
-                queryset = queryset.filter(data_criada__date=start_date)
+                queryset = queryset.filter(data_aplicada=start_date)
 
         if atividade_filter:
             queryset = queryset.filter(atividade__id=atividade_filter)
@@ -427,7 +424,7 @@ def receber_dados(request):
         # data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         data_aplicada = datetime.strptime(dados["data1"], "%Y-%m-%d")
 
-        data_aplicada = pytz.timezone("Europe/London").localize(data_aplicada)
+        data_aplicada = pytz.timezone("America/Sao_Paulo").localize(data_aplicada)
 
         # Crie uma nova instância do modelo FichaDeAplicacao e salve-a no banco de dados
         ficha_aplicacao = FichaDeAplicacao(

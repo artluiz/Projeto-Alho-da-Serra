@@ -17,7 +17,7 @@
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    font-size: 1.25em;
+    font-size: 0.8em;
   }
 
   .cabecalho {
@@ -32,23 +32,23 @@
   }
 
   .logo {
-    max-width: 200px;
+    max-width: 80px;
     margin-right: 10px;
   }
   .ass {
-    max-width: 150%;
+    max-width: 120%;
     margin-right: 10px;
   }
 
   .info-container {
-    margin-top: 20px;
+    margin-top: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
   .assinatura {
-    margin-top: 20px;
+    margin-top: 5px;
     width:100%;
   }
 
@@ -63,26 +63,25 @@
 
   .info{
     margin-top: 5px;
-    max-width: 800px;
+    max-width: 400px;
     display: flex;
   }
 
   .info p {
-    min-width: 200px;
+    min-width: 50px;
     margin: 0;
-    padding: 8px;
+    padding: 2px;
   }
 
   .info2{
     margin-top: 5px;
-    max-width: 700px;
     display: flex;
   }
 
   .info2 p {
-    min-width: 200px;
+    min-width: 50px;
     margin: 0;
-    padding: 8px;
+    padding: 2px;
   }
 
   .info2 p:first-child {
@@ -100,154 +99,169 @@
   table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
+    margin-top: 5px;
   }
 
   th,
   td {
-    border: 1px solid black;
-    padding: 8px;
+    font-size: 11px;
+    border-left: 1px solid black;
+    border-top: 1px solid black;
+    padding: 2px;
     text-align: center;
+  }
+  td:last-child{
+    border-right: 1px solid black;
+  }
+  th:last-child{
+    border-right: 1px solid black;
   }
 
   th {/**/
-    background-color: #f2f2f2;
+    font-size: 11px
   }
 </style>
-<body class="container-fluid" onload="window.print()">
-  <div class="cabecalho">
-    <!-- Logo da empresa -->
-    <div class="logo-container">
-      <img
-        src="{% static '/todos/images/logo.jpeg' %}"
-        alt="Logo da Empresa"
-        class="logo"
-      />
-      <h1 style="font-size: 50px">Controle de aplicações</h1>
+{% load static %}
+<script src= "{% static 'js/html2pdf.bundle.min.js'%}"
+integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" 
+crossorigin="anonymous" 
+referrerpolicy="no-referrer"></script>
+<body class="container-fluid" >
+  <div id="content">
+    <div class="cabecalho">
+      <!-- Logo da empresa -->
+      <div class="logo-container">
+        <img
+          src="{% static '/todos/images/logo.jpeg' %}"
+          alt="Logo da Empresa"
+          class="logo"
+        />
+        <h1 style="font-size: 25px">Controle de aplicações</h1>
+      </div>
+
+      <!-- Número da relação e data da operação -->
+      <div class="info-container">
+        <div
+          class="numero-recomendacao"
+          id="meuElemento"
+          data-ficha-pk="{{ ficha.pk }}"
+        >
+          <h5>N ̊ da Recomendação: E{{ ficha.pk }}</h5>
+        </div>
+        <div class="data-operacao">
+          <h4>
+            Data da Aplicação: 
+            <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span></h4>
+        </div>
+      </div>
     </div>
 
-    <!-- Número da relação e data da operação -->
-    <div class="info-container">
-      <div
-        class="numero-recomendacao"
-        id="meuElemento"
-        data-ficha-pk="{{ ficha.pk }}"
-      >
-        <h2>N ̊ da Recomendação: E{{ ficha.pk }}</h2>
-      </div>
-      <div class="data-operacao">
-        <h2>
-          Data da Aplicação: 
-          <span>{{ ficha.data_aplicada|date:'d-m-Y' }}</span></h2>
-      </div>
-    </div>
-  </div>
+    <div>
+      <div class="info">
+        <div style=" margin-right: 5px;">
+          <p>
+            Atividade:
+            <span class="campo-selecao" id="id_atividade">
+              {{ ficha.atividade.nome }}
+            </span>
+          </p>
+        </div>
 
-  <div>
-    <div class="info">
-      <div style=" margin-right: 10px;">
+        <div >
+          <p>
+        <span href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</span>
+          </p>
+        </div>
+      </div>
+
+      <div class="info2">
         <p>
-          Atividade:
-          <span class="campo-selecao" id="id_atividade">
-            {{ ficha.atividade.nome }}
+          Estufa:
+          <span class="campo-selecao" id="id_estufa">
+            {{ ficha.estufa.nome_estufa }}
+          </span>
+        </p>
+
+        <p>
+          Área:
+          <span id="id_area" name="area">{{ ficha.area }}</span>
+        </p>
+
+        <p>
+          Fazenda:
+          <span id="id_fazenda" name="fazenda">{{ ficha.estufa.fazenda }}</span>
+        </p>
+      </div>
+
+      <div class="info">
+        <p style:"border-bottom: 1px solid black;">
+          Irrigador:
+          <span class="campo-selecao" id="id_tipo_irrigador">
+            {{ ficha.irrigador.nome_tipo }}
           </span>
         </p>
       </div>
-
-      <div >
-        <p>
-      <span href="">Data da Operação: {{ ficha.data_criada|date:"d/m/Y H:i" }}</span>
-        </p>
-      </div>
     </div>
 
-    <div class="info2">
-      <p>
-        Estufa:
-        <span class="campo-selecao" id="id_estufa">
-          {{ ficha.estufa.nome_estufa }}
-        </span>
-      </p>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Produto</th>
+          <th>Dose por HÁ</th>
+          <th>Setor A</th>
+          <th>Setor B</th>
+          <th>Anti Câmara</th>
+          <th>Consumo Previsto</th>
+          <th>Consumo Total</th>
+        </tr>
+      </thead>
 
-      <p>
-        Área:
-        <span id="id_area" name="area">{{ ficha.area }}</span>
-      </p>
-
-      <p>
-        Fazenda:
-        <span id="id_fazenda" name="fazenda">{{ ficha.estufa.fazenda }}</span>
+      <tbody>
+        {% for ficha in ficha.dados %}
+        <tr {% if forloop.counter == 10 %}style="border-bottom: 1px solid black;"{% endif %}>
+          <td >{{ forloop.counter }}</td>
+          <td>
+            <span class="campo-selecao"> {{ ficha.nome_produto|default:'' }} {% if ficha.produto %}- ({{ ficha.produto|default:'' }}){% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.campo1 %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.campo2 %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.antiCamara %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
+          </td>
+          <td>
+            <span>{{ ficha.total|floatformat:2 }}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    
+    <div style="border: 1px solid black; margin-top:3px;">
+      <p style="padding-top:3px; margin-bottom:1px;">
+        OBS: {{ ficha.obs|default:'' }}
       </p>
     </div>
 
-    <div class="info">
-      <p style:"border-bottom: 1px solid black;">
-        Irrigador:
-        <span class="campo-selecao" id="id_tipo_irrigador">
-          {{ ficha.irrigador.nome_tipo }}
-        </span>
-      </p>
+    <div class="assinatura">
+      <img
+        src="{% static '/todos/images/assinaturar.png' %}"
+        alt="Logo da Empresa"
+        class="ass"
+      />
     </div>
   </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Produto</th>
-        <th>Dose por HÁ</th>
-        <th>Setor A</th>
-        <th>Setor B</th>
-        <th>Anti Câmara</th>
-        <th>Consumo Previsto</th>
-        <th>Consumo Total</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for ficha in ficha.dados %}
-      <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>
-          <span class="campo-selecao"> {{ ficha.nome_produto|default:'' }} {% if ficha.produto %}- ({{ ficha.produto|default:'' }}){% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.dose|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.campo1|floatformat:2 }} {% if ficha.campo1 %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.campo2|floatformat:2 }} {% if ficha.campo2 %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.antiCamara|floatformat:2 }} {% if ficha.antiCamara %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
-        </td>
-        <td>
-          <span>{{ ficha.total|floatformat:2 }}</span>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  
-  <div style="border: 1px solid black; margin-top:10px;">
-    <p style="padding-top:15px;">
-      OBS: {{ ficha.obs|default:'' }}
-    </p>
-  </div>
-
-  <div class="assinatura">
-    <img
-      src="{% static '/todos/images/assinaturar.png' %}"
-      alt="Logo da Empresa"
-      class="ass"
-    />
-  </div>
-
+  <button id="generate" class="btn btn-success btn-lg mt-2">Gerar PDF</button>
   <!-- Conteúdo da página continua aqui -->
 
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
@@ -256,5 +270,28 @@
     document.addEventListener("DOMContentLoaded", function () {
       // Seu código JavaScript/jQuery aqui...
     });
+  </script>
+  
+  <script>
+    function imprimirPagina() {
+      const content = document.querySelector("#content");
+
+      const options = {
+        margin: [5, 10, 10, 10],
+        filename: "teste.pdf",
+        html2canvas:{scale:3},
+        jsPDF: {unit:"mm", format: "a5", orientation:"landscape"}
+      };
+
+      html2pdf().set(options).from(content).save();
+
+      setTimeout(function() {
+        window.history.back();
+      }, 120);
+    }
+
+    window.onload = function() {
+      imprimirPagina();
+    };
   </script>
 </body>

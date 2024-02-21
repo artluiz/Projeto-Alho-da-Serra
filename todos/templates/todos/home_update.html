@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% load static %}
-{% block content %} {% load tz %} {% load my_filters %}
+{% block page_title %} Atualizar Ficha {% endblock page_title %}
+{% block content %} {% load tz %} 
     <style>
       /* Exemplo de estilo básico, personalize conforme necessário */
       body {
@@ -59,7 +60,6 @@
 
       .info a {
         border: 1px solid black;
-        min-width: 200px;
         margin: 0;
         padding: 8px;
       }
@@ -89,20 +89,20 @@
       }
 
       table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
 
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: center;
-        }
+      th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+      }
 
-        th {
-            background-color: #f2f2f2;
-        }
+      th {
+        background-color: #f2f2f2;
+      }
     </style>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
@@ -133,15 +133,16 @@
             <option value={{ ficha.atividade.pk }}>{{ficha.atividade.nome}}</option>
             {% for atividade in atividades %}
               {% if atividade.pk != ficha.atividade.pk %}
-                    {% if atividade.ativo == 1 %}
-                      <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
-                    {% endif %}
+                {% if atividade.ativo == 1 %}
+                  <option value={{ atividade.pk }}>{{ atividade.nome }}</option>
+                {% endif %}
               {% endif %}
             {% endfor %}
           </select>
         </a>
-            <p>Data da Aplicação<input type="date" id="data2" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></p>
+        <a>Data da Aplicação: <input type="date" id="data2" value="{{ ficha.data_aplicada|date:'Y-m-d' }}"></a>
       </div>
+      
       <div class="info2">
         <a> Estufa: <select class="campo-selecao", id="id_estufa">
             <option value={{ ficha.estufa.pk }}>{{ ficha.estufa.nome_estufa}}</option>
@@ -159,8 +160,8 @@
         </a>
       </div>
       <div class="info">
-        <p> Irrigador: 
-          <select class="campo-selecao", id="id_tipo_irrigador">
+        <p style="min-width:700px;"> Tipo de Irrigador: 
+          <select class="campo-selecao", id="id_tipo_irrigador" style="min-width:500px;">
             <option value={{ ficha.irrigador.pk }}>{{ ficha.irrigador.nome_tipo}}</option>
             {% for tipo_irrigador in tipos_irrigador %}
               {% if tipo_irrigador.pk != ficha.irrigador.pk%}

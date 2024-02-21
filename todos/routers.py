@@ -167,7 +167,6 @@ class DatabaseSynchronizer:
         with connections["secondary"].cursor() as cursor:
             cursor.execute("SELECT codigo FROM todos_produtos")
             existing_product_codes = {row[0] for row in cursor.fetchall()}
-            print("Existing product codes:", existing_product_codes)
 
             if not existing_product_codes:
                 print("No existing product codes found in the secondary database.")
@@ -476,14 +475,12 @@ class DatabaseDownloader:
         with connections["default"].cursor() as cursor:
             cursor.execute("SELECT codigo FROM todos_produtos")
             existing_product_codes = {row[0] for row in cursor.fetchall()}
-            print("Existing product codes:", existing_product_codes)
 
             if not existing_product_codes:
                 print("No existing product codes found in the secondary database.")
                 existing_product_codes = set()
 
             for row in rows:
-                print("entrou.")
                 product_code = row[2]
                 if product_code not in existing_product_codes:
                     produto = row[1] if row[1] is not None else 0
