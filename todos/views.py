@@ -39,8 +39,11 @@ def muda_cod(request):
 
 
 def sync_db_view(request):
-    response = ModificarProdutoRouter.modificar_produtos()
-    return response
+    DatabaseSynchronizer.sync_db_atividade()
+    DatabaseSynchronizer.sync_db_estufa()
+    DatabaseSynchronizer.sync_db_produto()
+    DatabaseSynchronizer.sync_db()
+    return HttpResponseRedirect(reverse("ficha_list"))
 
 
 def down_db_view(request):

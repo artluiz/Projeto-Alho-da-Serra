@@ -6,5 +6,8 @@
     },
     "emmet.includeLanguages": {
         "django-html":"html"
-    }
+    },
+    "cSpell.words": [
+        "atividade"
+    ]
 }

@@ -59,6 +59,11 @@ class FichaDeAplicacaoRouter:
             return "default"
         return None
 
+    def db_for_write(self, model, **hints):
+        if model == FichaDeAplicacao:
+            return "secondary"
+        return None
+
 
 class DatabaseSynchronizer:
     @staticmethod
