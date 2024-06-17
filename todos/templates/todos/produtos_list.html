@@ -34,7 +34,7 @@
       <tbody>
         {% for produto in produtos_list %}
         <tr>
-          <th scope="row">{{ produto.pk }}</th>
+          <th scope="row">P{{ forloop.counter }}</th>
           <td style="text-align: left">{{ produto.produto }}</td>
           <td>{{ produto.codigo }}</td>
           <td style="text-align: left">{{ produto.descricao }}</td>

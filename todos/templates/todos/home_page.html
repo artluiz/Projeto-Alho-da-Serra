@@ -146,7 +146,7 @@
             <option value="">Selecione uma opção</option>
             {% for estufa in estufas %}
               {% if estufa.ativo == 1 %}
-                <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.fazenda }}">{{ estufa.nome_estufa }}</option>
+                <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.fazenda }}">{{ estufa.nome_estufa }} - ({{ estufa.codigo }})</option>
               {% endif %}
             {% endfor %}
           </select>

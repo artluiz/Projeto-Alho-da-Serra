@@ -63,7 +63,7 @@
 
   .info{
     margin-top: 5px;
-    max-width: 400px;
+    max-width: 420px;
     display: flex;
   }
 
@@ -120,9 +120,16 @@
   th {/**/
     font-size: 11px
   }
+  .checkbox-right {
+    transform: scale(0.5);
+    position: relative;
+    right: -55;
+    pointer-events: none; 
+    opacity: 1;  
+  }
 </style>
 {% load static %}
-<body class="container-fluid" >
+<body class="container-fluid" onload="window.print()">
   <div id="content">
     <div class="cabecalho">
       <!-- Logo da empresa -->
@@ -174,7 +181,7 @@
         <p>
           Estufa:
           <span class="campo-selecao" id="id_estufa">
-            {{ ficha.estufa.nome_estufa }}
+            {{ ficha.estufa.nome_estufa }} - ({{ ficha.estufa.codigo }})
           </span>
         </p>
 
@@ -235,8 +242,9 @@
           <td>
             <span>{{ ficha.previsto|floatformat:2 }} {% if ficha.dose %}Kg ou L{% endif %}</span>
           </td>
-          <td>
-            <span>{{ ficha.total|floatformat:2 }}</span>
+          <td class="td-relative">
+            <span>{{ ficha.total|floatformat:2 }} </span>
+            {% if ficha.previsto %}<input type="checkbox" class="ativo-checkbox checkbox-right" readonly onclick="return false;">{% endif %}
           </td>
         </tr>
         {% endfor %}
@@ -257,37 +265,11 @@
       />
     </div>
   </div>
-  <button id="generate" class="btn btn-success btn-lg mt-2">Gerar PDF</button>
-  <!-- Conteúdo da página continua aqui -->
 
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
   <script defer>
     document.addEventListener("DOMContentLoaded", function () {
-      // Seu código JavaScript/jQuery aqui...
     });
-  </script>
-  
-  <script>
-    function imprimirPagina() {
-      const content = document.querySelector("#content");
-
-      const options = {
-        margin: [5, 10, 10, 10],
-        filename: "teste.pdf",
-        html2canvas:{scale:3},
-        jsPDF: {unit:"mm", format: "a5", orientation:"landscape"}
-      };
-
-      html2pdf().set(options).from(content).save();
-
-      setTimeout(function() {
-        window.history.back();
-      }, 120);
-    }
-
-    window.onload = function() {
-      imprimirPagina();
-    };
   </script>
 </body>

@@ -6,8 +6,11 @@ from django.views.generic import (
     View,
     DetailView,
 )
+import io
 from django.shortcuts import redirect
 import pandas as pd
+import shutil
+import os
 from django.urls import reverse_lazy, reverse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -31,14 +34,39 @@ from django.shortcuts import render
 
 
 def muda_cod(request):
-    # Chamar o método de classe para modificar os produtos
     response = ModificarProdutoRouter.modificar_produtos()
 
-    # Retornar a resposta para o cliente
     return response
 
 
+def fazer_backup_db():
+    # Caminho para o arquivo db.sqlite atual
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    db_path = os.path.abspath(os.path.join(dir_path, "..", "db.sqlite3"))
+    # Pasta de backup onde o arquivo db.sqlite será copiado
+    backup_path = os.path.abspath(os.path.join(dir_path, "..", "backup"))
+
+    try:
+        if not os.path.exists(backup_path):
+            os.makedirs(backup_path)
+
+        # Verifica se o arquivo db.sqlite existe
+        if os.path.exists(db_path):
+            date_today = datetime.now().strftime("%Y-%m-%d--%H-%M")
+            backup_file_n = f"db_{date_today}.sqlite3"
+            backup_path_file = os.path.join(backup_path, backup_file_n)
+            # Copia o arquivo db.sqlite para a pasta de backup
+            shutil.copy(db_path, backup_path_file)
+            print("Backup do banco de dados feito com sucesso!")
+        else:
+            print("O arquivo db.sqlite não existe.")
+    except Exception as e:
+        print(f"Erro ao fazer backup do banco de dados: {str(e)}")
+
+
 def sync_db_view(request):
+    fazer_backup_db()
     DatabaseSynchronizer.sync_db_atividade()
     DatabaseSynchronizer.sync_db_estufa()
     DatabaseSynchronizer.sync_db_produto()
@@ -47,6 +75,7 @@ def sync_db_view(request):
 
 
 def down_db_view(request):
+    fazer_backup_db()
     DatabaseDownloader.sync_db_atividade()
     DatabaseDownloader.sync_db_estufa()
     DatabaseDownloader.sync_db_produto()
@@ -70,10 +99,7 @@ class FichaRelatorioProduto(ListView):
         context["atividades"] = Atividade.objects.all()
         context["tipo_irrigadores"] = TipoIrrigador.objects.all()
 
-        # Processar os dados do queryset para estrutura desejada
-        dados_estruturados = defaultdict(
-            float
-        )  # Dicionário padrão para armazenar previstos por produto
+        dados_estruturados = defaultdict(float)
 
         queryset = self.get_queryset()
         for ficha in queryset:
@@ -85,17 +111,13 @@ class FichaRelatorioProduto(ListView):
 
         for ficha in self.get_queryset():
             if ficha.ativo:
-                dados_json_lista = (
-                    ficha.dados
-                )  # Não é necessário usar .get() para listas
+                dados_json_lista = ficha.dados
                 for item in dados_json_lista:
                     if "produto" in item and "previsto" in item:
-                        # Adiciona ou soma previsto ao produto na estrutura
                         if item["previsto"] != "":
                             previsto = float(item["previsto"])
                             dados_estruturados[item["produto"]] += previsto
 
-        # Convertendo o defaultdict para um dicionário regular
         context["dados_estruturados"] = dict(dados_estruturados)
 
         return context
@@ -111,7 +133,6 @@ class FichaFiltro(ListView):
         context["atividades"] = Atividade.objects.all()
         context["tipo_irrigadores"] = TipoIrrigador.objects.all()
 
-        # Atualizar os dados do produto
         for ficha in context["fichadeaplicacao_list"]:
             for item in ficha.dados:
                 if "produto" in item:
@@ -150,7 +171,6 @@ class FichaFiltro(ListView):
         return queryset.order_by("data_aplicada")
 
     def get_template_names(self):
-        # Verifique a parte da URL para decidir qual template usar
         if "relatorio" in self.request.path:
             return ["fichadeaplicacao_relatorio.html"]
         return ["fichadeaplicacao_list.html"]
@@ -172,7 +192,6 @@ class FichaFiltroProduto(ListView):
 
         queryset = self.get_queryset()
 
-        # Estruturação dos dados
         dados_estruturados = defaultdict(float)
         for ficha in queryset:
             for item in ficha.dados:
@@ -183,17 +202,13 @@ class FichaFiltroProduto(ListView):
 
         for ficha in queryset:
             if ficha.ativo:
-                dados_json_lista = (
-                    ficha.dados
-                )  # Não é necessário usar .get() para listas
+                dados_json_lista = ficha.dados
                 for item in dados_json_lista:
                     if "nome_produto" in item and "previsto" in item:
-                        # Adiciona ou soma previsto ao produto na estrutura
                         if item["previsto"] != "":
                             previsto = float(item["previsto"])
                             dados_estruturados[item["nome_produto"]] += previsto
 
-        # Convertendo o defaultdict para um dicionário regular
         context["dados_estruturados"] = dict(dados_estruturados)
 
         return context
@@ -228,25 +243,89 @@ class FichaFiltroProduto(ListView):
         return queryset
 
 
+def export_ficha_excel(request):
+    # Obtenha os filtros da requisição
+    atividade_filter = request.GET.get("atividade_filter")
+    estufa_filter = request.GET.get("estufa_filter")
+    status_filter = request.GET.get("status_filter")
+    start_date = request.GET.get("start_date")
+    end_date = request.GET.get("end_date")
+
+    # Obtenha o queryset filtrado
+    queryset = FichaDeAplicacao.objects.all()
+
+    if start_date and end_date:
+        queryset = queryset.filter(data_aplicada__range=(start_date, end_date))
+    else:
+        if start_date:
+            queryset = queryset.filter(data_aplicada=start_date)
+
+    if atividade_filter:
+        queryset = queryset.filter(atividade__id=atividade_filter)
+
+    if estufa_filter:
+        queryset = queryset.filter(estufa__id=estufa_filter)
+
+    if status_filter is not None:
+        if status_filter == "true":
+            queryset = queryset.filter(pendente=False)
+        elif status_filter == "false":
+            queryset = queryset.filter(pendente=True)
+
+    data = []
+
+    for ficha in queryset:
+        for item in ficha.dados:
+            if "produto" in item:
+                cod_produto = item["produto"]
+                if cod_produto != "":
+                    produto = Produtos.objects.get(codigo=cod_produto)
+                    item["nome_produto"] = produto.produto
+
+                data.append(
+                    {
+                        "Codigo": "E" + str(ficha.id),
+                        "Data": ficha.data_aplicada,
+                        "Estufa": ficha.estufa.nome_estufa,
+                        "Cod_Prod": item.get("produto", ""),
+                        "Produto": item.get("nome_produto", ""),
+                        "Previsto": item.get("previsto", ""),
+                    }
+                )
+
+    df = pd.DataFrame(data)
+
+    buffer = io.BytesIO()
+    with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Sheet1")
+
+    buffer.seek(0)
+
+    response = HttpResponse(
+        buffer,
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = "attachment; filename=Campo_relatório.xlsx"
+
+    return response
+
+
 def upload_excel_file(request):
     if request.method == "POST":
         excel_file = request.FILES["inputExcel"]
 
         if str(excel_file).split(".")[-1] in ["xls", "xlsx"]:
+            Produtos.objects.update(ativo=False)
             data = pd.read_excel(excel_file)
             for _, row in data.iterrows():
-                produto_cod = row[
-                    "Cód."
-                ]  # Certifique-se de que a coluna ID exista na planilha
+                produto_cod = row["Cód."]
 
-                # Aqui, certifique-se de que todas as colunas necessárias estejam presentes
                 if (
                     pd.isna(produto_cod)
                     or pd.isna(row["Produto"])
                     or pd.isna(row["Cód."])
                     or pd.isna(row["Descrição"])
                 ):
-                    # Lidar com dados faltantes, por exemplo, pulando a linha ou registrando um erro
                     continue
 
                 data_criada = datetime.now()
@@ -255,16 +334,15 @@ def upload_excel_file(request):
                 produto.produto = row["Produto"]
                 produto.codigo = row["Cód."]
                 produto.descricao = row["Descrição"]
+                produto.ativo = True
                 produto.data_criada = data_criada
                 produto.data_atualizado = data_criada
                 produto.save()
 
             return HttpResponseRedirect(reverse("produtos_list"))
         else:
-            # Adicione aqui o código para lidar com o caso de o arquivo não ser um Excel
             pass
     else:
-        # Adicione aqui o código para lidar com o caso de o método não ser POST
         pass
 
 
@@ -408,10 +486,8 @@ def todo_update(request, pk):
 @csrf_exempt
 def receber_dados(request):
     if request.method == "POST" or request.method == "PUT":
-        # Decodifique os bytes para uma string e carregue o JSON
         dados = json.loads(request.body.decode("utf-8"))
 
-        # Agora você pode acessar os dados como um dicionário Python
         if request.method == "PUT":
             ficha_aplicacao = get_object_or_404(
                 FichaDeAplicacao, pk=Atividade.objects.get(pk=(dados["ficha_pk"]))
@@ -424,12 +500,10 @@ def receber_dados(request):
         obs = dados["obs"]
         data_criada = timezone.now()
 
-        # data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         data_aplicada = datetime.strptime(dados["data1"], "%Y-%m-%d")
 
         data_aplicada = pytz.timezone("America/Sao_Paulo").localize(data_aplicada)
 
-        # Crie uma nova instância do modelo FichaDeAplicacao e salve-a no banco de dados
         ficha_aplicacao = FichaDeAplicacao(
             data_atualizado=data_criada,
             data_criada=data_criada,
@@ -438,7 +512,6 @@ def receber_dados(request):
             area=area,
             irrigador=irrigador_id,
             dados=dados_tabela,
-            # data_planejada=data_planejada,
             data_aplicada=data_aplicada,
             obs=obs,
         )
@@ -452,26 +525,18 @@ def receber_dados(request):
 @csrf_exempt
 def atualizar_dados(request):
     if request.method == "PUT":
-        # Decodifique os bytes para uma string e carregue o JSON
         dados = json.loads(request.body.decode("utf-8"))
-        # Obtenha a ficha existente pelo id
         ficha_aplicacao = get_object_or_404(FichaDeAplicacao, pk=dados["ficha_pk"])
 
-        # Atualize os campos desejados
         ficha_aplicacao.atividade = Atividade.objects.get(pk=(dados["atividade_id"]))
         ficha_aplicacao.estufa = Estufa.objects.get(pk=(dados["estufa_id"]))
-        # ficha_aplicacao.area = dados["area"].replace(",", ".")
         ficha_aplicacao.area = dados["area"]
         ficha_aplicacao.irrigador = TipoIrrigador.objects.get(
             pk=(dados["irrigador_id"])
         )
         ficha_aplicacao.dados = dados["dados_tabela"]
-        # ficha_aplicacao.data_planejada = datetime.strptime(dados["data1"], "%Y-%m-%d")
         ficha_aplicacao.data_aplicada = datetime.strptime(dados["data"], "%Y-%m-%d")
 
-        # ficha_aplicacao.data_planejada = pytz.timezone("Europe/London").localize(
-        #    ficha_aplicacao.data_planejada
-        # )
         ficha_aplicacao.data_aplicada = pytz.timezone("Europe/London").localize(
             ficha_aplicacao.data_aplicada
         )
@@ -479,7 +544,6 @@ def atualizar_dados(request):
             pytz.timezone("Europe/London")
         )
 
-        # Salve a instância para atualizar o banco de dados
         ficha_aplicacao.save()
 
         return JsonResponse({"status": "success"}, safe=False)
@@ -589,26 +653,22 @@ class EstufaListView(ListView):
 
 class EstufaCreateView(CreateView):
     model = Estufa
-    fields = ["nome_estufa", "area", "fazenda"]
+    fields = ["nome_estufa", "codigo", "area", "fazenda"]
     success_url = reverse_lazy("estufa_list")
 
     def form_valid(self, form):
-        # Atualiza no banco de dados primário
         form.instance.data_criada = datetime.now()
         form.instance.save(using="default")
-        # Atualiza no banco de dados secundário
         return super().form_valid(form)
 
 
 class EstufaUpdateView(UpdateView):
     model = Estufa
-    fields = ["nome_estufa", "area", "fazenda"]
+    fields = ["nome_estufa", "codigo", "area", "fazenda"]
     success_url = reverse_lazy("estufa_list")
 
     def form_valid(self, form):
-        # Atualiza no banco de dados primário
         form.instance.save(using="default")
-        # Atualiza no banco de dados secundário
         return super().form_valid(form)
 
 
@@ -626,9 +686,7 @@ class AtividadeCreateView(CreateView):
     success_url = reverse_lazy("atividade_list")
 
     def form_valid(self, form):
-        # Atualiza no banco de dados primário
         form.instance.save(using="default")
-        # Atualiza no banco de dados secundário
         return super().form_valid(form)
 
 
@@ -638,10 +696,8 @@ class AtividadeUpdateView(UpdateView):
     success_url = reverse_lazy("atividade_list")
 
     def form_valid(self, form):
-        # Atualiza no banco de dados primário
         form.instance.data_criada = datetime.now()
         form.instance.save(using="default")
-        # Atualiza no banco de dados secundário
         return super().form_valid(form)
 
 
@@ -659,10 +715,8 @@ class ProdutosCreateView(CreateView):
     success_url = reverse_lazy("produtos_list")
 
     def form_valid(self, form):
-        # Atualiza no banco de dados primário
         form.instance.data_criada = datetime.now()
         form.instance.save(using="default")
-        # Atualiza no banco de dados secundário
         return super().form_valid(form)
 
 
@@ -672,9 +726,7 @@ class ProdutosUpdateView(UpdateView):
     success_url = reverse_lazy("produtos_list")
 
     def form_valid(self, form):
-        # Atualiza no banco de dados primário
         form.instance.save(using="default")
-        # Atualiza no banco de dados secundário
         return super().form_valid(form)
 
 

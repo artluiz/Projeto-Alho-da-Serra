@@ -145,11 +145,11 @@
       
       <div class="info2">
         <a> Estufa: <select class="campo-selecao", id="id_estufa">
-            <option value={{ ficha.estufa.pk }}>{{ ficha.estufa.nome_estufa}}</option>
+            <option value={{ ficha.estufa.pk }}>{{ ficha.estufa.nome_estufa }} - ({{ ficha.estufa.codigo }})</option>
             {% for estufa in estufas %}
               {% if estufa.pk != ficha.estufa.pk %}
                 {% if estufa.ativo == 1 %}
-                  <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.fazenda }}">{{ estufa.nome_estufa }}</option>
+                  <option value={{ estufa.pk }} data-area="{{ estufa.area }}" data-fazenda="{{ estufa.fazenda }}">{{ estufa.nome_estufa }} - ({{ estufa.codigo }})</option>
                 {% endif %}
               {% endif %}
             {% endfor %}

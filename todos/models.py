@@ -1,7 +1,6 @@
 from django.db import models
 
 
-# Create your models here.
 class Estufa(models.Model):
     data_criada = models.DateTimeField(
         verbose_name="Data de criação", blank=False, auto_now=False, auto_now_add=False
@@ -11,6 +10,7 @@ class Estufa(models.Model):
         auto_now=True,
         auto_now_add=False,
     )
+    codigo = models.IntegerField(verbose_name="Codigo", null=False)
     nome_estufa = models.CharField(
         verbose_name="Estufa", max_length=50, null=False, blank=False
     )
@@ -41,7 +41,7 @@ class Atividade(models.Model):
 
 class Produtos(models.Model):
     data_criada = models.DateTimeField(
-        verbose_name="Data de criação", blank=False, auto_now_add=False
+        verbose_name="Data de criação", blank=False, auto_now_add=True
     )
     data_atualizado = models.DateTimeField(
         verbose_name="Data da aplicação",

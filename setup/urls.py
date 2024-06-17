@@ -32,6 +32,7 @@ from todos.views import (
     TipoIrrigadorListView,
     sync_db_view,
     down_db_view,
+    export_ficha_excel,
 )
 
 urlpatterns = [
@@ -60,6 +61,9 @@ urlpatterns = [
     path("ficha_filtro/", FichaFiltro.as_view(), name="ficha_filtro"),
     path(
         "ficha_filtro/relatorio/", FichaFiltro.as_view(), name="ficha_filtro_relatorio"
+    ),
+    path(
+        "ficha_filtro/relatorio_excel/", export_ficha_excel, name="ficha_filtro_excel"
     ),
     path(
         "ficha_filtro/relatorio_prod/",

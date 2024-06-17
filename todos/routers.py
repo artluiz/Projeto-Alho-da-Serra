@@ -59,11 +59,6 @@ class FichaDeAplicacaoRouter:
             return "default"
         return None
 
-    def db_for_write(self, model, **hints):
-        if model == FichaDeAplicacao:
-            return "secondary"
-        return None
-
 
 class DatabaseSynchronizer:
     @staticmethod
@@ -183,10 +178,10 @@ class DatabaseSynchronizer:
                     produto = row[4] if row[4] is not None else 0
                     codigo = row[1] if row[1] is not None else 0
                     descricao = row[2] if row[2] is not None else ""
-                    ativo = row[3] if row[3] is not None else ""
+                    ativo = row[3] if row[3] is not None else "true"
                     Produtos.objects.using("secondary").create(
-                        data_criada=row[1],
-                        data_atualizado=row[2],
+                        data_criada=row[6],
+                        data_atualizado=row[5],
                         codigo=codigo,
                         descricao=descricao,
                         ativo=ativo,
@@ -258,6 +253,7 @@ class DatabaseSynchronizer:
                     nome_estufa = row[1] if row[1] is not None else ""
                     area = row[2] if row[2] is not None else 0.0
                     ativo = row[3] if row[3] is not None else True
+                    codigo = row[7] if row[7] is not None else 0.0
 
                     Estufa.objects.using("secondary").create(
                         data_criada=ficha_data_criada,
@@ -266,6 +262,7 @@ class DatabaseSynchronizer:
                         nome_estufa=nome_estufa,
                         area=area,
                         ativo=ativo,
+                        codigo=codigo,
                     )
             for row in rows:
                 id_default = row[0]
@@ -277,7 +274,6 @@ class DatabaseSynchronizer:
                 if row_secondary:
                     data_atualizacao_secondary = row_secondary[5]
 
-                    data_atualizacao_default = data_atualizacao_default
                     timezone1 = data_atualizacao_default.tzinfo
                     data_atualizacao_secondary = data_atualizacao_secondary.replace(
                         tzinfo=timezone1
@@ -292,6 +288,7 @@ class DatabaseSynchronizer:
                             "area = %s, "
                             "ativo = %s, "
                             "fazenda = %s "
+                            "codigo = %s, "
                             "WHERE id = %s",
                             [
                                 row[6],
@@ -300,6 +297,7 @@ class DatabaseSynchronizer:
                                 row[2],
                                 row[3],
                                 row[4],
+                                row[7],
                                 id_default,
                             ],
                         )
@@ -385,15 +383,19 @@ class DatabaseDownloader:
             latest_date_in_database = FichaDeAplicacao.objects.using(
                 "default"
             ).aggregate(models.Max("data_criada"))["data_criada__max"]
+            latest_id_in_database = FichaDeAplicacao.objects.using("default").aggregate(
+                models.Max("id")
+            )["id__max"]
 
             if latest_date_in_database:
                 latest_date_in_database = latest_date_in_database
                 timezone1 = latest_date_in_database.tzinfo
             for row in rows:
                 ficha_data_criada = row[1].replace(tzinfo=timezone1)
-                if (
-                    not latest_date_in_database
-                    or ficha_data_criada > latest_date_in_database
+                ficha_id = row[0]
+                if not latest_date_in_database or (
+                    ficha_data_criada > latest_date_in_database
+                    and ficha_id > latest_id_in_database
                 ):
                     area = row[5] if row[5] is not None else 0.0
                     dados = json.loads(row[6]) if row[6] is not None else {}
@@ -524,10 +526,10 @@ class DatabaseDownloader:
                             "UPDATE todos_produtos SET "
                             "data_criada = %s, "
                             "data_atualizado = %s, "
+                            "produto = %s, "
                             "codigo = %s, "
                             "descricao = %s, "
-                            "ativo = %s, "
-                            "produto = %s "
+                            "ativo = %s "
                             "WHERE codigo = %s",
                             [
                                 row[6],
@@ -564,6 +566,7 @@ class DatabaseDownloader:
                     nome_estufa = row[1] if row[1] is not None else ""
                     area = row[2] if row[2] is not None else 0.0
                     ativo = row[4] if row[4] is not None else True
+                    codigo = row[7] if row[7] is not None else 0.0
 
                     Estufa.objects.using("default").create(
                         data_criada=row[6],
@@ -572,6 +575,7 @@ class DatabaseDownloader:
                         nome_estufa=nome_estufa,
                         area=area,
                         ativo=ativo,
+                        codigo=codigo,
                     )
 
             for row in rows:
@@ -586,7 +590,6 @@ class DatabaseDownloader:
                 if row_default:
                     data_atualizacao_default = row_default[5]
 
-                    data_atualizacao_default = data_atualizacao_default
                     timezone1 = data_atualizacao_default.tzinfo
                     data_atualizacao_secondary = data_atualizacao_secondary.replace(
                         tzinfo=timezone1
@@ -601,6 +604,7 @@ class DatabaseDownloader:
                             "area = %s, "
                             "ativo = %s, "
                             "fazenda = %s "
+                            "codigo = %s, "
                             "WHERE id = %s",
                             [
                                 row[6],
@@ -609,6 +613,7 @@ class DatabaseDownloader:
                                 row[2],
                                 row[4],
                                 row[3],
+                                row[7],
                                 id_secondary,
                             ],
                         )

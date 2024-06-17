@@ -33,7 +33,7 @@
         <select id="estufa_filter" name="estufa_filter" class="form-control" style="max-width: 500px;">
             <option value="" selected>Selecione uma Estufa</option>
             {% for estufa in estufas %}
-                <option value="{{ estufa.id }}">{{ estufa.nome_estufa }}</option>
+                <option value="{{ estufa.id }}">{{ estufa.nome_estufa }} - ({{ estufa.codigo }})</option>
             {% endfor %}
         </select>
       <label class="input-group-text" id="basic-addon1" for="status_filter" style="min-width: 210px; max-width: 250px;">Filtrar por Status:</label>
@@ -50,6 +50,7 @@
           <div class="dropdown-menu">
             <button type="submit" class="dropdown-item" formaction="{% url 'ficha_filtro_relatorio' %}">Padrão</button>
             <button type="submit" class="dropdown-item" formaction="{% url 'ficha_filtro_prod' %}">Produto</button>
+            <button type="submit" class="dropdown-item" formaction="{% url 'ficha_filtro_excel' %}">Excel</button>
           </div>
         </div>
         
@@ -76,7 +77,7 @@
       {% for ficha in fichadeaplicacao_list %}
       <tr>
         <th scope="row">E{{ ficha.pk }}</th>
-        <td>{{ ficha.estufa.nome_estufa }}</td>
+        <td>{{ ficha.estufa.nome_estufa }} - ({{ ficha.estufa.codigo }})</td>
         <td>{{ ficha.atividade.nome }}</td>
         <td>{{ ficha.irrigador.nome_tipo }}</td>
         <td>{{ ficha.data_criada }}</td>
