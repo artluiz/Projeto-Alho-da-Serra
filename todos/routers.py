@@ -287,8 +287,8 @@ class DatabaseSynchronizer:
                             "nome_estufa = %s, "
                             "area = %s, "
                             "ativo = %s, "
-                            "fazenda = %s "
-                            "codigo = %s, "
+                            "fazenda = %s, "
+                            "codigo = %s "
                             "WHERE id = %s",
                             [
                                 row[6],
@@ -603,8 +603,8 @@ class DatabaseDownloader:
                             "nome_estufa = %s, "
                             "area = %s, "
                             "ativo = %s, "
-                            "fazenda = %s "
-                            "codigo = %s, "
+                            "fazenda = %s, "
+                            "codigo = %s "
                             "WHERE id = %s",
                             [
                                 row[6],
