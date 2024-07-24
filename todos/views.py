@@ -74,12 +74,17 @@ def sync_db_view(request):
     return HttpResponseRedirect(reverse("ficha_list"))
 
 
-def down_db_view(request):
+def down_db_without_request():
     fazer_backup_db()
     DatabaseDownloader.sync_db_atividade()
     DatabaseDownloader.sync_db_estufa()
     DatabaseDownloader.sync_db_produto()
     DatabaseDownloader.sync_db()
+    return HttpResponseRedirect(reverse("ficha_list"))
+
+
+def down_db_view(request):
+    down_db_without_request()
     return HttpResponseRedirect(reverse("ficha_list"))
 
 

@@ -10,7 +10,10 @@ https://docs.djangoproject.com/en/5.0/howto/deployment/wsgi/
 import os
 
 from django.core.wsgi import get_wsgi_application
+from todos.views import down_db_without_request
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "setup.settings")
 
 application = get_wsgi_application()
+
+down_db_without_request()
