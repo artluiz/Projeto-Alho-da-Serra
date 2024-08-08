@@ -1,6 +1,31 @@
 from django.contrib import admin
 from django.urls import path
-from todos.views import (
+from todos.views.atividade_views import (
+    AtividadeListView,
+    AtividadeCreateView,
+    AtividadeUpdateView,
+    AtividadeDeleteView,
+)
+from todos.views.estufa_views import (
+    EstufaListView,
+    EstufaCreateView,
+    EstufaUpdateView,
+    EstufaDeleteView,
+    estufa_toggle_active,
+)
+from todos.views.misc_views import (
+    upload_excel_file,
+    sync_db_view,
+    down_db_view,
+)
+from todos.views.produto_views import (
+    ProdutosCreateView,
+    ProdutosListView,
+    ProdutosUpdateView,
+    ProdutosDeleteView,
+    produto_toggle_active,
+)
+from todos.views.ficha_views import (
     todo_home,
     todo_repetir,
     todo_update,
@@ -9,29 +34,14 @@ from todos.views import (
     atualizar_dados,
     ficha_toggle_pendente,
     ficha_toggle_active,
-    produto_toggle_active,
-    estufa_toggle_active,
-    upload_excel_file,
-    FichaFiltro,
     FichaListView,
+    ImprimirFicha,
     FichaRelatorioProduto,
     FichaFiltroProduto,
-    ImprimirFicha,
-    EstufaListView,
-    EstufaCreateView,
-    EstufaUpdateView,
-    EstufaDeleteView,
-    AtividadeListView,
-    AtividadeCreateView,
-    AtividadeUpdateView,
-    AtividadeDeleteView,
-    ProdutosCreateView,
-    ProdutosListView,
-    ProdutosUpdateView,
-    ProdutosDeleteView,
+    FichaFiltro,
+)
+from todos.views.tipoirrigacao_views import (
     TipoIrrigadorListView,
-    sync_db_view,
-    down_db_view,
 )
 
 urlpatterns = [
