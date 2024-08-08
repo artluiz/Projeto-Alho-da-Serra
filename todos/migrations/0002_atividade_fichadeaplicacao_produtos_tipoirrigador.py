@@ -10,6 +10,34 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
+            name="Produtos",
+            fields=[
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("data_criada", models.DateTimeField(verbose_name="Data de criação")),
+                (
+                    "data_atualizado",
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Data da aplicação"
+                    ),
+                ),
+                ("produto", models.CharField(max_length=50, verbose_name="Produto")),
+                ("codigo", models.IntegerField(verbose_name="Codigo")),
+                (
+                    "descricao",
+                    models.CharField(max_length=50, verbose_name="Descrição"),
+                ),
+                ("ativo", models.BooleanField(default=True)),
+            ],
+        ),
+        migrations.CreateModel(
             name="Atividade",
             fields=[
                 (
@@ -43,23 +71,6 @@ class Migration(migrations.Migration):
                 ("estufa_id", models.PositiveIntegerField()),
                 ("produto_id", models.PositiveIntegerField()),
                 ("irrigador_id", models.PositiveIntegerField()),
-            ],
-        ),
-        migrations.CreateModel(
-            name="Produtos",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("nome_produto", models.CharField(max_length=30)),
-                ("codigo", models.IntegerField()),
-                ("descricao", models.CharField(max_length=100)),
             ],
         ),
         migrations.CreateModel(

@@ -97,6 +97,14 @@ DATABASES = {
         "PASSWORD": "alh24luiz",
         "HOST": "database2.caioerwlhlbp.us-east-1.rds.amazonaws.com",
         "PORT": "5432",
+    },
+    'terciary': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'alho_recomendacao_T',
+        'USER': 'luiz',
+        'PASSWORD': '1304',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 

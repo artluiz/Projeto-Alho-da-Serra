@@ -101,28 +101,11 @@ class FichaRelatorioProduto(ListView):
         return context
 
 
-class FichaFiltro(ListView):
-    model = FichaDeAplicacao
-    context_object_name = "fichadeaplicacao_list"
+class FichaFilter:
+    def __init__(self, request):
+        self.request = request
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["estufas"] = Estufa.objects.all()
-        context["atividades"] = Atividade.objects.all()
-        context["tipo_irrigadores"] = TipoIrrigador.objects.all()
-
-        # Atualizar os dados do produto
-        for ficha in context["fichadeaplicacao_list"]:
-            for item in ficha.dados:
-                if "produto" in item:
-                    cod_produto = item["produto"]
-                    produto = Produtos.objects.get(codigo=cod_produto)
-                    item["nome_produto"] = produto.produto
-        return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-
+    def apply_filters(self, queryset):
         atividade_filter = self.request.GET.get("atividade_filter")
         estufa_filter = self.request.GET.get("estufa_filter")
         status_filter = self.request.GET.get("status_filter")
@@ -147,7 +130,34 @@ class FichaFiltro(ListView):
             elif status_filter == "false":
                 queryset = queryset.filter(pendente=True)
 
-        return queryset.order_by("data_aplicada")
+        return queryset
+
+
+class FichaFiltro(ListView):
+    model = FichaDeAplicacao
+    context_object_name = "fichadeaplicacao_list"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["estufas"] = Estufa.objects.all()
+        context["atividades"] = Atividade.objects.all()
+        context["tipo_irrigadores"] = TipoIrrigador.objects.all()
+
+        # Atualizar os dados do produto
+        for ficha in context["fichadeaplicacao_list"]:
+            for item in ficha.dados:
+                if "produto" in item:
+                    cod_produto = item["produto"]
+                    produto = Produtos.objects.get(codigo=cod_produto)
+                    item["nome_produto"] = produto.produto
+        return context
+
+    def get_queryset(self):
+        return (
+            FichaFilter(self.request)
+            .apply_filters(super().get_queryset())
+            .order_by("data_aplicada")
+        )
 
     def get_template_names(self):
         # Verifique a parte da URL para decidir qual template usar
@@ -199,33 +209,11 @@ class FichaFiltroProduto(ListView):
         return context
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-
-        atividade_filter = self.request.GET.get("atividade_filter")
-        estufa_filter = self.request.GET.get("estufa_filter")
-        status_filter = self.request.GET.get("status_filter")
-        start_date = self.request.GET.get("start_date")
-        end_date = self.request.GET.get("end_date")
-
-        if start_date and end_date:
-            queryset = queryset.filter(data_criada__range=(start_date, end_date))
-        else:
-            if start_date:
-                queryset = queryset.filter(data_criada__date=start_date)
-
-        if atividade_filter:
-            queryset = queryset.filter(atividade__id=atividade_filter)
-
-        if estufa_filter:
-            queryset = queryset.filter(estufa__id=estufa_filter)
-
-        if status_filter is not None:
-            if status_filter == "true":
-                queryset = queryset.filter(pendente=False)
-            elif status_filter == "false":
-                queryset = queryset.filter(pendente=True)
-
-        return queryset
+        return (
+            FichaFilter(self.request)
+            .apply_filters(super().get_queryset())
+            .order_by("data_aplicada")
+        )
 
 
 def upload_excel_file(request):

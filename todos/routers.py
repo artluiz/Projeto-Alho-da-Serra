@@ -316,7 +316,7 @@ class DatabaseSynchronizer:
                 latest_date_in_database = latest_date_in_database
                 timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada = row[3].replace(tzinfo=timezone1)
+                ficha_data_criada = row[4].replace(tzinfo=timezone1)
 
                 if (
                     not latest_date_in_database
@@ -386,7 +386,8 @@ class DatabaseDownloader:
                 latest_date_in_database = latest_date_in_database
                 timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada = row[1].replace(tzinfo=timezone1)
+                print(row[0])
+                ficha_data_criada = row[1]
                 if (
                     not latest_date_in_database
                     or ficha_data_criada > latest_date_in_database
@@ -509,7 +510,7 @@ class DatabaseDownloader:
                 row_default = cursor.fetchone()
 
                 if row_default:
-                    data_atualizacao_default = row_default[5]
+                    data_atualizacao_default = row_default[2]
 
                     data_atualizacao_default = data_atualizacao_default
                     timezone1 = data_atualizacao_default.tzinfo
@@ -522,18 +523,18 @@ class DatabaseDownloader:
                             "UPDATE todos_produtos SET "
                             "data_criada = %s, "
                             "data_atualizado = %s, "
+                            "produto = %s, "
                             "codigo = %s, "
                             "descricao = %s, "
-                            "ativo = %s, "
-                            "produto = %s "
+                            "ativo = %s "
                             "WHERE codigo = %s",
                             [
-                                row[6],
-                                row[5],
                                 row[1],
                                 row[2],
                                 row[3],
                                 row[4],
+                                row[6],
+                                row[5],
                                 cod_secondary,
                             ],
                         )
@@ -618,15 +619,15 @@ class DatabaseDownloader:
             rows = cursor.fetchall()
 
         with connections["default"].cursor() as cursor:
-            latest_date_in_database = Estufa.objects.using("default").aggregate(
+            latest_date_in_database = Atividade.objects.using("default").aggregate(
                 models.Max("data_criada")
             )["data_criada__max"]
             if latest_date_in_database:
                 latest_date_in_database = latest_date_in_database
                 timezone1 = latest_date_in_database.tzinfo
             for row in rows:
-                ficha_data_criada = row[4].replace(tzinfo=timezone1)
-
+                ficha_data_criada = row[4]
+                print(ficha_data_criada, latest_date_in_database)
                 if (
                     not latest_date_in_database
                     or ficha_data_criada > latest_date_in_database
@@ -634,7 +635,7 @@ class DatabaseDownloader:
                     nome = row[1] if row[1] is not None else ""
                     ativo = row[2] if row[2] is not None else True
 
-                    Atividade.objects.using("secondary").create(
+                    Atividade.objects.using("default").create(
                         data_criada=ficha_data_criada,
                         data_atualizado=row[3],
                         nome=nome,
